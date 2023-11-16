@@ -84,7 +84,7 @@ function ChatBotShow(){
       setResponse("");
       setLoadingChat(true); //disables user ability to send messages
       setLoadingResponse(true); //brings up the typing message gif
-      dispatch(fetchChatResponse(chat._id, {role: 'user', content: request, name: sessionUser.username })).then(()=>setLoadingResponse(false));
+      dispatch(fetchChatResponse(chat._id, {role: 'user', content: request})).then(()=>setLoadingResponse(false));
     } catch (err) {
       console.log(err)
     }

@@ -112,12 +112,11 @@ import('p-queue').then((PQueueModule) => {
                 const audioBase64 = await convertTextToAudio(chunk);
                 // If audio conversion was successful, handle the audio chunk here
                 if (audioBase64) {
-                  console.log('Audio chunk converted to base64:', audioBase64);
+                  //console.log('Audio chunk converted to base64:', audioBase64);
                   // Handle the audio chunk (save and provide URLs, or send via WebSocket)
                 }
               }
             }
-
             // Send the chunk of text to the frontend as well
            // io.emit(`${userName}`, { text: sentence });
           });
