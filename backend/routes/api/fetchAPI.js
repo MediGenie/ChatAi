@@ -1,12 +1,9 @@
-
-import fetch from 'node-fetch';
-import fs from 'fs';
-const config = JSON.parse(fs.readFileSync('config.json', 'utf-8'));
+const fetch = require('node-fetch');
 
 // Function to convert text to audio using ElevenLabs API
-export const convertTextToAudio = async (textToConvert, voiceId) => {
+const convertTextToAudio = async (textToConvert) => {
   // Set the API key for ElevenLabs API
-  const apiKey = config.API_KEY_AUDIO;
+  const apiKey = process.env.API_KEY_AUDIO;
 
   const data = {
     text: textToConvert,
@@ -18,7 +15,7 @@ export const convertTextToAudio = async (textToConvert, voiceId) => {
     },
   };
 
-  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream?optimize_streaming_latency=1`, {
+  const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/hjlaVGmIa72yfOAHbXYK/stream?optimize_streaming_latency=1`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -37,4 +34,8 @@ export const convertTextToAudio = async (textToConvert, voiceId) => {
     console.error('Error converting text to audio:', await response.text());
     return null;
   }
+};
+
+module.exports = {
+  convertTextToAudio
 };
