@@ -10,6 +10,7 @@ const socket = require('../config/socket.js');
 const mongoose = require('mongoose');
 mongoose.set("strictQuery", false);
 const { mongoURI: db } = require('../config/keys.js');
+//process.env.DEBUG = 'socket.io*';
 
 /**
  * Get port from environment and store in Express.

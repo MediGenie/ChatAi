@@ -34,7 +34,10 @@ if (!isProduction) {
   // Enable CORS only in development because React will be on the React
   // development server (http://localhost:3000). (In production, the Express 
   // server will serve the React files statically.)
-  app.use(cors());
+  app.use((req, res, next) => {
+    res.setHeader('Referrer-Policy', 'no-referrer'); // Sets a more restrictive policy
+    next();
+  });
 }
 
 // Set the _csrf token and create req.csrfToken method to generate a hashed

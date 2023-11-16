@@ -1,17 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import { fetchChatBot } from "../../store/chatbots";
 import { fetchChatResponse, receiveChatRequest, clearChatResponse} from '../../store/chat';
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 import typingGif from "../../assets/typing-text.gif";
 import { delay } from "../Util";
-import { openModal } from "../../store/modal";
-import loadingGif from "../../assets/loading.gif"
-import { BsFillArrowLeftCircleFill } from 'react-icons/bs';
-import {AiFillCloseCircle} from 'react-icons/ai';
 import {BiSolidSend} from 'react-icons/bi';
 import {SlOptions} from 'react-icons/sl';
-import {TbError404} from 'react-icons/tb'
+import {TbError404} from 'react-icons/tb';
+import io from 'socket.io-client';
 
 function ChatBotShow(){
   
@@ -27,11 +24,16 @@ function ChatBotShow(){
   const [loadingChat, setLoadingChat] = useState(false); //disables chat until message finishes
 
   const [showMenu, setShowMenu] = useState(false);
+  
+  const [audioQueue, setAudioQueue] = useState([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioPlayerRef = useRef(null);
 
   const chat = useSelector(state => Object.keys(state.entities.chats).length === 0 ? {} : state.entities.chats.current);
   const newResponse = useSelector(state => state.entities.chats?.new);
 
   const chatEndRef = useRef(null);
+  const socket = io('http://localhost:5001');
   
   const scrollToBottomChat = ()=>{
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -46,6 +48,55 @@ function ChatBotShow(){
     setResponse('');
     // dispatch(clearChatResponse())
   }, [bot])
+
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+    });
+
+    socket.on('error', (error) => {
+      console.error('WebSocket connection error:', error);
+    });
+    
+    // Listen for audio messages
+    socket.on(`${sessionUser?.username}`, (message) => {
+      console.log('Received message:', message);
+      if (message.audio) {
+        console.log('Received audio message:', message.audio);
+        handleIncomingAudio(message);
+      }
+      // Optionally handle text messages if needed
+    });
+  
+    return () => socket.on('disconnect', () => {
+      console.log('Disconnected from WebSocket server');
+    });
+  }, [sessionUser?.username]);
+
+
+  const handleIncomingAudio = async (data) => {
+    if (data) {
+      setAudioQueue((prevAudioQueue) => [...prevAudioQueue, data.audio]);
+    }
+  };
+
+  useEffect(() => {
+    if (!isPlaying && audioQueue.length > 0) {
+      
+      const nextAudio = audioQueue[0];
+      playAudio(nextAudio); // Play the first audio in the queue
+      setAudioQueue(prevQueue => prevQueue.slice(1)); // Remove the played audio
+    }
+  }, [audioQueue, isPlaying]);
+
+  const playAudio = (base64Data) => {
+    setIsPlaying(true);
+
+    const audio = new Audio(`data:audio/mpeg;base64,${base64Data}`);
+    audio.onended = () => setIsPlaying(false);
+    audio.play();
+    audioPlayerRef.current = audio;
+  };
 
 
   useEffect(()=>{

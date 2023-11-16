@@ -8,6 +8,8 @@ const { requireUser } = require('../../config/passport');
 const { convertTextToAudio } = require('./fetchAPI.js');
 const socket = require('../../config/socket');
 
+
+
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -110,8 +112,8 @@ import('p-queue').then((PQueueModule) => {
                 const audioBase64 = await convertTextToAudio(chunk);
                 // If audio conversion was successful, handle the audio chunk here
                 if (audioBase64) {
-                  //console.log('Audio chunk converted to base64:', audioBase64);
-                  io.emit(`${req.user.userName}`, { audio: audioBase64, text: chunk });
+                  console.log(`Emitting audio to ${req.user.username}`);
+                  io.emit(`${req.user.username}`, { audio: audioBase64, text: chunk });
                 }
               }
             }
