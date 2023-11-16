@@ -30,7 +30,9 @@ exports.loginUser = async function(user) {
     _id: user._id,
     username: user.username,
     profileImageUrl: user.profileImageUrl.includes('aws') ? user.profileImageUrl : retrievePrivateFile(user.profileImageUrl),
-    email: user.email
+    email: user.email,
+    age: user.age,
+    location: user.location
   };
   const token = await jwt.sign(
     userInfo, // payload

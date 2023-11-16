@@ -1,5 +1,8 @@
 import { Route, Redirect } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 export const AuthRoute = ({ component: Component, path, exact }) => {
   const loggedIn = useSelector(state => !!state.session.user);

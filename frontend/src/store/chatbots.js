@@ -110,12 +110,12 @@ export const fetchUserChatBots = id => async dispatch => {
 };
 
 export const createChatBot = (chatBot) => async dispatch => {
-  const { image, name, prompt, from, description, greeting} = chatBot;
+  const { image, name, systemprompt, context, elevenlabs, greeting} = chatBot;
   const formData = new FormData();
   formData.append("name", name);
-  formData.append("prompt", prompt);
-  formData.append("from", from);
-  formData.append("description", description);
+  formData.append("context", context);
+  formData.append("elevenlabs", elevenlabs);
+  formData.append("systemprompt", systemprompt);
   formData.append("greeting", greeting);
   formData.append("image", image);
   try {

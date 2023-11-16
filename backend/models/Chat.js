@@ -10,7 +10,6 @@ const chatSchema = Schema({
     type: Schema.Types.ObjectId,
     ref: 'ChatBot'
   },
-  
   messages: {
     type: [Object],
     required: true

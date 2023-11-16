@@ -14,25 +14,21 @@ const chatBotSchema = Schema({
     type: String,
     required: false
   },
-  featured: {
-    type: Boolean,
-    required: false
-  },
-  description: {
+  systemprompt: {
     type: String,
     required: false
-  },
-  prompt: {
-    type: String,
-    required: false
-  },
-  from: {
-    type: String,
-    required: false
-  },
+  },    
   greeting: {
     type: String,
-    required: true
+    required: false
+  },     
+  elevenlabs: {
+    type: String,
+    required: false
+  },
+  context: {
+    type: String,
+    required: false
   }
 }, {
   timestamps: true

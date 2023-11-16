@@ -33,7 +33,8 @@ function Profile () {
       <div className='profile-container'>
         <div className='profile-logout'>
           <h1>You are currently signed in as <strong>{currentUser?.username}</strong> <button onClick={logoutUser} id="logout-button" title='Logout'> <RiLogoutBoxRLine /></button></h1>
-          
+          <h1>Your location is <strong>{currentUser?.location}</strong></h1>
+          <h1>Your age is <strong>{currentUser?.age}</strong></h1>
         </div>
         <div className='profile-bots-container'>
           <div className="profile-created-container">
