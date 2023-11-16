@@ -186,12 +186,12 @@ function ChatBotShow(){
               {/* {bot?.author.username && <h1 className="chat-header">Chat with {bot?.name}{bot?.author.username !== 'admin' ? ` (@${bot?.author.username})`: null}</h1>} */}
               <div className='chatbot-show-box'>
                 <ul>
-                    {bot?.greeting && <div>
+                    {bot?.name && <div>
                       <div className='chatbot-show-message-detail'> 
                         <img className='chatbot-show-img-small' src={bot?.profileImageUrl} alt={bot?.name} />
                         <h1>{bot?.name} </h1>
                       </div>
-                      <h2>{bot.greeting}</h2>
+                      <h2>{bot.name}</h2>
                     </div>
                     }
                   {chat?.messages?.map((mess, i)=>{

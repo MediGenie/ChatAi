@@ -77,7 +77,7 @@ router.patch('/:id', requireUser, async (req, res) => {
                   .populate("chatBot", "_id name")
   const chatBot = await ChatBot.findOne({_id: chat.chatBot._id})
   try{
-    const data = await getAiResponse(chatBot, chat, req.body.chatRequest);
+    const data = await getAiResponse(chatBot, chat, req.body.chatRequest, req.user);
     chat.messages = [...chat.messages, req.body.chatRequest, data]
     const updatedChat = await chat.save();
     return res.json(updatedChat);

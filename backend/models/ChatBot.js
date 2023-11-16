@@ -17,11 +17,7 @@ const chatBotSchema = Schema({
   systemprompt: {
     type: String,
     required: false
-  },    
-  greeting: {
-    type: String,
-    required: false
-  },     
+  },  
   elevenlabs: {
     type: String,
     required: false

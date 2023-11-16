@@ -12,7 +12,6 @@ function ChatBotNew(props){
   const [systemprompt, setSystemPrompt] = useState('');
   const [elevenlabs, setElevenLabs] = useState('');
   const [context, setContext] = useState('');
-  const [greeting, setGreeting] = useState('');
   const [image, setImage] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
   const errors = useSelector(state => state.errors.session);
@@ -35,7 +34,6 @@ function ChatBotNew(props){
       setName(chatbot.name);
       if(chatbot.systemprompt) setSystemPrompt(chatbot.systemprompt);
       if(chatbot.elevenlabs) setElevenLabs(chatbot.elevenlabs);
-      if(chatbot.greeting) setGreeting(chatbot.greeting);
       if(chatbot.context) setContext(chatbot.context);
     }
 
@@ -52,9 +50,6 @@ function ChatBotNew(props){
         break;
       case 'systemprompt':
         setState = setSystemPrompt;
-        break;
-      case 'greeting':
-        setState = setGreeting;
         break;
       // case 'imagePrompt':
       //   setState = setImagePrompt;
@@ -108,7 +103,6 @@ function ChatBotNew(props){
     const bot = {
       name,
       image,
-      greeting,
       systemprompt,
       elevenlabs,
       context
@@ -158,17 +152,6 @@ function ChatBotNew(props){
               value={elevenlabs}
               onChange={update('elevenlabs')}
               // placeholder="How does the chatbot perceive itself?"
-            />
-          </div>
-          <div className="errors">{errors?.greeting}</div>
-          <div className='input-container'>
-            <label id={greeting && 'filled'}>Greeting</label>
-            <textarea
-              value={greeting}
-              // onInput='this.style.height = "";this.style.height = this.scrollHeight + "px"'
-              onChange={update('greeting')}
-              // style={{overflow: 'hidden'}}
-              // placeholder="Details about your chatbot so it acts the way you want."
             />
           </div>
           <div className="errors">{errors?.systemprompt}</div>
