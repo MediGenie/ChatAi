@@ -6,6 +6,7 @@ const Chat = mongoose.model('Chat');
 const {getAiResponse} = require('../../openAi');
 const { requireUser } = require('../../config/passport');
 const { convertTextToAudio } = require('./fetchAPI.js');
+const socket = require('../../config/socket');
 
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -68,14 +69,11 @@ import('p-queue').then((PQueueModule) => {
       const chat = await Chat.findOne({ _id: req.params.id, author: { _id: req.user._id } })
         .populate('chatBot', '_id name');
       const chatBot = await ChatBot.findOne({ _id: chat.chatBot._id });
-
+      const io = socket.getIO();
       // Get AI response
       const textResponse = await getAiResponse(chatBot, chat, req.body.chatRequest, req.user);
       chat.messages = [...chat.messages, req.body.chatRequest, textResponse];
       const updatedChat = await chat.save();
-
-      // Send updated chat back to the client
-      res.json(updatedChat);
 
       // Process the text response
       if (textResponse && typeof textResponse.content === 'string') {
@@ -113,17 +111,16 @@ import('p-queue').then((PQueueModule) => {
                 // If audio conversion was successful, handle the audio chunk here
                 if (audioBase64) {
                   //console.log('Audio chunk converted to base64:', audioBase64);
-                  // Handle the audio chunk (save and provide URLs, or send via WebSocket)
+                  io.emit(`${req.user.userName}`, { audio: audioBase64, text: chunk });
                 }
               }
             }
-            // Send the chunk of text to the frontend as well
-           // io.emit(`${userName}`, { text: sentence });
           });
         }
       } else {
         console.error('Invalid textResponse format:', textResponse);
       }
+      res.json(updatedChat);
     } catch (err) {
       console.error(err);
       return res.status(500).json('Could not return that request');
