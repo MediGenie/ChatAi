@@ -18,7 +18,7 @@ const singleFileUpload = async ({ file, public = false }) => {
   const command = new PutObjectCommand(uploadParams);
   const result = await s3.send(command);
 
-  return public ? `https://${NAME_OF_BUCKET}.s3.amazonaws.com/${uploadParams.Key}` : uploadParams.Key;
+  return public ? `https://${NAME_OF_BUCKET}.s3.ap-northeast-2.amazonaws.com/${uploadParams.Key}` : uploadParams.Key;
 };
 
 const multipleFilesUpload = async ({files, public = false}) => {
@@ -37,7 +37,13 @@ const retrievePrivateFile = async (key) => {
     });
 
     try {
+
+      console.log(`Retrieving file from S3: ${key}`); // Log file retrieval attempt
+
+      // Construct the public URL
       const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // Expires in 1 hour
+  
+      console.log(`Retrieved file URL: ${url}`); // Log the URL of the retrieved file
       return url;
     } catch (error) {
       console.error("Error generating signed URL", error);

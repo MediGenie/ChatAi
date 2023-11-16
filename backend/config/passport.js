@@ -26,24 +26,31 @@ passport.use(new LocalStrategy({
 
 
 exports.loginUser = async function(user) {
+  // Retrieve the private file URL if needed and await its resolution
+  let profileImageUrl = user.profileImageUrl;
+  if (!user.profileImageUrl.includes('aws')) {
+    profileImageUrl = await retrievePrivateFile(user.profileImageUrl);
+  }
+
   const userInfo = {
     _id: user._id,
     username: user.username,
-    profileImageUrl: user.profileImageUrl.includes('aws') ? user.profileImageUrl : retrievePrivateFile(user.profileImageUrl),
+    profileImageUrl: profileImageUrl,
     email: user.email,
     age: user.age,
     location: user.location
   };
+
   const token = await jwt.sign(
     userInfo, // payload
     secretOrKey, // sign with secret key
     { expiresIn: 10800 } // key expires in 3 hours
   );
+
   return {
     user: userInfo,
     token
   };
-  
 };
 
 const options = {};

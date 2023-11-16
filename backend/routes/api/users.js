@@ -85,24 +85,28 @@ router.post('/login', singleMulterUpload(""), validateRegisterInput, async (req,
 });
 
 
-router.get('/current', restoreUser, (req, res) => {
+router.get('/current', restoreUser, async (req, res) => {
   if (!isProduction) {
     // In development, allow React server to gain access to the CSRF token
-    // whenever the current user information is first loaded into the
-    // React application
     const csrfToken = req.csrfToken();
     res.cookie("CSRF-TOKEN", csrfToken);
   }
   if (!req.user) return res.json(null);
+
+  // Retrieve the private file URL if needed and await its resolution
+  let profileImageUrl = req.user.profileImageUrl;
+  if (!req.user.profileImageUrl.includes('aws')) {
+    profileImageUrl = await retrievePrivateFile(req.user.profileImageUrl);
+  }
+
   res.json({
     _id: req.user._id,
     username: req.user.username,
-    profileImageUrl: req.user.profileImageUrl.includes('aws') ? req.user.profileImageUrl : retrievePrivateFile(req.user.profileImageUrl),
+    profileImageUrl: profileImageUrl,
     email: req.user.email,
     age: req.user.age,
     location: req.user.location
   });
 });
-
 
 module.exports = router;

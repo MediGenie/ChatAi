@@ -11,15 +11,16 @@ const { singleFileUpload, singleMulterUpload, retrievePrivateFile } = require(".
 router.get('/', requireUser, async (req, res) => {
   try {
     let chatbots;
-    if(!req.query.query){ //req.query.query will be undefined if just doing a request for all bots with no query
+    if (!req.query.query) {
       chatbots = await ChatBot.find()
                   .populate("author", "_id username")
-                  .sort({ name: 1});
-      chatbots.forEach(bot=>{
-        if(!bot.profileImageUrl.includes('aws') ){
-          bot.profileImageUrl = retrievePrivateFile(bot.profileImageUrl)
+                  .sort({ name: 1 });
+      for (const bot of chatbots) {
+        if (!bot.profileImageUrl.includes('aws')) {
+          bot.profileImageUrl = await retrievePrivateFile(bot.profileImageUrl); // Added await
+          console.log(`Retrieved S3 URL for bot ${bot._id}: ${bot.profileImageUrl}`); // Log the URL
         }
-      }) 
+      }
     } else {
         chatbots = await ChatBot.find({"name": { "$regex": req.query.query, "$options": "i" }})  //$options of 'i' makes search case insensitive
                     .populate("author", "_id username")
@@ -45,11 +46,13 @@ router.get('/:id', requireUser, async (req, res, next) => {
   let chatbot = null;
   try {
     chatbot = await ChatBot.findById(req.params.id)
-                    .populate("author", "_id username")
-    if(!chatbot.profileImageUrl.includes('aws') ){
-      chatbot.profileImageUrl = retrievePrivateFile(chatbot.profileImageUrl)
+                    .populate("author", "_id username");
+    if (!chatbot.profileImageUrl.includes('aws')) {
+      chatbot.profileImageUrl = await retrievePrivateFile(chatbot.profileImageUrl); // Added await
+      console.log(`Retrieved S3 URL for chatbot ${chatbot._id}: ${chatbot.profileImageUrl}`); // Log the URL
     }
-  } catch(err) {
+  } catch (err) {
+    console.error("Error in '/:id' route:", err); // Log the error
     const error = new Error('Chatbot not found');
     error.statusCode = 404;
     error.errors = { message: "No chatbot found with that id" };
@@ -71,27 +74,28 @@ router.get('/user/:userId', requireUser, async (req, res, next) => {
   let user;
   try {
     user = await User.findById(req.params.userId);
-  } catch(err) {
+  } catch (err) {
+    console.error("Error in '/user/:userId' route:", err); // Log the error
     const error = new Error('User not found');
     error.statusCode = 404;
     error.errors = { message: "No user found with that id" };
     return next(error);
   }
   try {
-    
     const chatBots = await ChatBot.find({ author: user })
                           .sort({ createdAt: -1 })
-                          .populate("author", "_id username profileImageUrl")
-    chatBots.forEach(bot=>{
-      if(!bot.profileImageUrl.includes('aws') ){
-        bot.profileImageUrl = retrievePrivateFile(bot.profileImageUrl)
+                          .populate("author", "_id username profileImageUrl");
+    for (const bot of chatBots) {
+      if (!bot.profileImageUrl.includes('aws')) {
+        bot.profileImageUrl = await retrievePrivateFile(bot.profileImageUrl); // Added await
+        console.log(`Retrieved S3 URL for chatbot ${bot._id}: ${bot.profileImageUrl}`); // Log the URL
       }
-    })
-    return res.json(chatBots)
-  } catch(err){
+    }
+    return res.json(chatBots);
+  } catch (err) {
+    console.error("Error in '/user/:userId' route:", err); // Log the error
     return res.json([]);
   }
-  
 });
 
 //create new chatbot
@@ -110,12 +114,13 @@ router.post('/', singleMulterUpload("image"),  requireUser, async (req, res, nex
     });
     let chatBot = await newChatBot.save();
     chatBot = await chatBot.populate("author", "_id username profileImageUrl");
-    if(!chatBot.profileImageUrl.includes('aws') ){
-      chatBot.profileImageUrl = retrievePrivateFile(chatBot.profileImageUrl)
+    if (!chatBot.profileImageUrl.includes('aws')) {
+      chatBot.profileImageUrl = await retrievePrivateFile(chatBot.profileImageUrl); // Added await
+      console.log(`Retrieved S3 URL for new chatbot ${chatBot._id}: ${chatBot.profileImageUrl}`); // Log the URL
     }
     return res.json(chatBot);
-
-  }catch(err) {
+  } catch (err) {
+    console.error("Error in POST '/':", err); // Log the error
     next(err);
   }
 });
@@ -142,7 +147,7 @@ router.patch('/:id', singleMulterUpload("image"), requireUser, async (req, res, 
     await chatbot.save();
     chatbot = await chatbot.populate("author", "_id username profileImageUrl");
     if(!chatbot.profileImageUrl.includes('aws') ){
-      chatbot.profileImageUrl = retrievePrivateFile(chatbot.profileImageUrl)
+      chatbot.profileImageUrl = await retrievePrivateFile(chatbot.profileImageUrl)
     }
   
     let chat = await Chat.findOne({ chatBot: chatbot, author: req.user})

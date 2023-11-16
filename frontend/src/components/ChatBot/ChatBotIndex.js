@@ -76,40 +76,9 @@ function ChatBotIndex(){
   {return loading ? <img className='loading-img' src={loadingGif}/> :
     <>
       <div className="chatbots-index-container">
-        <div className="featured-container">
-          <h1>Featured Chatbots</h1>
-          <Swiper
-          modules={[Navigation, Pagination, Scrollbar]}
-          className="swiper"
-          spaceBetween={10}
-          speed={700}
-          autoHeight={true}
-          centerInsufficientSlides={true}
-          slidesPerGroupAuto={true}
-          slidesPerView='auto'
-          // centeredSlides={true}
-          // breakpoints={breakpoints}
-          navigation
-          //  pagination={{ clickable: true }}
-          scrollbar={{ draggable: true, dragSize: 50, snapOnRelease: true}}
-          //  onSlideChange={() => console.log('slide change')}
-          //  onSwiper={(swiper) => console.log(swiper)}
-          >
-            {Object.values(chatBots).map((bot, i)=>{
-              return bot.featured ? (
-                <SwiperSlide key={bot._id}>
-                  <ul className="chatbots-index-details" >
-                    <li title={bot.name}>{bot.name}</li>
-                    <img src={bot.profileImageUrl} alt={bot.name}/>
-                    {chatted.includes(bot._id) ? <Link to={`/chatbots/${bot._id}`} id="resume-button">Resume Chat</Link> : <button onClick={clickHandler(bot._id)} id="chat-button"> Start Chat</button>}
-                  </ul>
-                </SwiperSlide>
-              ): null
-            })}
-          </Swiper>
-        </div>
+
         <div className="chatted-container">
-          <h1>Recently Chatted Chatbots</h1>
+          <h1>AI Assistants</h1>
           {chatted?.length ?
             <Swiper
             modules={[Navigation, Pagination, Scrollbar]}

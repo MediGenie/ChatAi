@@ -2,7 +2,6 @@ import { useEffect, useState, useRef } from "react";
 import {useDispatch, useSelector} from "react-redux";
 import { fetchChatBot } from "../../store/chatbots";
 import { fetchChatResponse, receiveChatRequest, clearChatResponse} from '../../store/chat';
-import { fetchPrompts, clearPrompts } from "../../store/prompts";
 import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 import typingGif from "../../assets/typing-text.gif";
 import { delay } from "../Util";
@@ -26,13 +25,12 @@ function ChatBotShow(){
   const [botLoaded, setBotLoaded] = useState(false);
   const [loadingResponse, setLoadingResponse] = useState(false); //shows message loading gif
   const [loadingChat, setLoadingChat] = useState(false); //disables chat until message finishes
-  const [loadingPrompts, setLoadingPrompts] = useState(false);
+
   const [showMenu, setShowMenu] = useState(false);
-  const [showPrompts, setShowPrompts] = useState(false);
 
   const chat = useSelector(state => Object.keys(state.entities.chats).length === 0 ? {} : state.entities.chats.current);
   const newResponse = useSelector(state => state.entities.chats?.new);
-  const prompts = useSelector(state => state.ui.prompts);
+
   const chatEndRef = useRef(null);
   
   const scrollToBottomChat = ()=>{
@@ -40,7 +38,7 @@ function ChatBotShow(){
   }
 
   useEffect(()=>{
-    dispatch(clearPrompts())
+
     dispatch(fetchChatBot(chatBotId)).then(()=> setBotLoaded(true));
   }, [dispatch, chatBotId])
 
@@ -49,18 +47,7 @@ function ChatBotShow(){
     // dispatch(clearChatResponse())
   }, [bot])
 
-  const generatePrompts = e => {  
-    e.preventDefault();
-    setLoadingPrompts(true);
-    setShowPrompts(true);
-    dispatch(clearPrompts());
-    dispatch(fetchPrompts(chatBotId)).then(()=>setLoadingPrompts(false));
-  }
-  // const handlePromptRegen = (e) => {
-    
-  // }
 
-  
   useEffect(()=>{
     if(newResponse){
       delayTypeResponse();
@@ -89,24 +76,6 @@ function ChatBotShow(){
     setRequest(e.target.value);
   }
   
-  const handlePromptClick = (e) => {
-    e.preventDefault();
-    if(!loadingChat){
-      try {
-        const prompt = e.target.innerText;
-        dispatch(receiveChatRequest(prompt));
-        setResponse("");
-        setLoadingChat(true);
-        setLoadingResponse(true);
-        setShowMenu(false);
-        dispatch(fetchChatResponse(chat._id, {role: 'user', content: prompt, name: sessionUser.username })).then(()=>setLoadingResponse(false));
-      } catch (err) {
-        console.log(err)
-      }
-
-    }
-  }
- 
   const handleSubmit = async(e)=>{
     e.preventDefault();
     try {
@@ -126,41 +95,7 @@ function ChatBotShow(){
     return (
     <div className="show-chat-popup-container">
       <div className="show-chat-popup">
-        {!showPrompts && <div className="show-chat-popup-buttons">
-          <div className="show-chat-popup-navigation">
-            <h1>Chatbot Options Menu</h1>
-            <div id="show-chat-popup-x" className="close-x" onClick={()=> setShowMenu(false)}><AiFillCloseCircle/></div>
-          </div>
-          {/* <Link to='/chatbots/'>Back to ChatBot Index</Link> */}
-          <button className='popup-button' disabled={loadingPrompts} onClick={generatePrompts}>Generate Prompts</button>
-          <button className='popup-button' onClick={()=> dispatch(openModal({name: 'clear history', fnc: setResponse}))}>Clear Chat History</button>
-          { bot?.author?._id.toString() === sessionUser?._id.toString() || sessionUser?.username === 'admin' ? <button className='popup-button' onClick={()=> dispatch(openModal({name:'edit'}))}>Edit Bot</button> : null}
-          { bot?.author?._id.toString() === sessionUser?._id.toString() || sessionUser?.username === 'admin' ? <button className='popup-button' onClick={()=> dispatch(openModal({name:'delete'}))}>Delete Bot</button> : null}
-          <button className='popup-button' onClick={()=> setShowMenu(false) || dispatch(openModal({name: 'clone'}))}>Clone Bot</button>
-        </div>}
-        {showPrompts && <div className="prompt-menu-wrapper">
-          <div className="show-chat-popup-navigation">
-            <div className='back-button' onClick={()=>setShowPrompts(false)}><BsFillArrowLeftCircleFill /></div>
-            <h1>Prompt Suggestions</h1>
-            <div id="show-chat-popup-x" className="close-x" onClick={()=> setShowMenu(false)}><AiFillCloseCircle/></div>
-          </div>
-          {loadingPrompts ? <img className='prompt-loading-img' src={loadingGif} alt='loading gif'/> :
-            <div className="prompt-suggestions-container">
-              <ul className="prompt-suggestions" onClick={handlePromptClick}>
-                {prompts?.response?.content.split('\n').map((prompt, i)=>{
-                const modified = !Number.isNaN(parseInt(prompt[0])) ? prompt.slice(3) : prompt.slice(0,2) === '- ' ? prompt.slice(1) : prompt[0] === '-' ? prompt.slice(1) : prompt;
-                return(
-                  // <li key={i} className="prompt-entry"><strong><AiOutlineStar/></strong> {modified}</li>
-                  <li key={i} className="prompt-entry">{modified}</li>
-                  )
-                })}
-              </ul>
-              <button className="prompt-suggestions-regen-button" onClick={generatePrompts}>Regenerate Prompts</button>  
-            </div>
-          }
-          
-        </div>}
-
+       
           </div>
       </div>
       )
