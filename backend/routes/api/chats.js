@@ -76,6 +76,7 @@ import('p-queue').then((PQueueModule) => {
       const textResponse = await getAiResponse(chatBot, chat, req.body.chatRequest, req.user);
       chat.messages = [...chat.messages, req.body.chatRequest, textResponse];
       const updatedChat = await chat.save();
+      res.json(updatedChat);
 
       // Process the text response
       if (textResponse && typeof textResponse.content === 'string') {
@@ -109,10 +110,11 @@ import('p-queue').then((PQueueModule) => {
               }
 
               if (chunk.trim().length > 0) {
-                const audioBase64 = await convertTextToAudio(chunk);
+                const audioBase64 = await convertTextToAudio(chunk,chatBot.elevenlabs);
                 // If audio conversion was successful, handle the audio chunk here
                 if (audioBase64) {
                   console.log(`Emitting audio to ${req.user.username}`);
+                  console.log(`Emitting audio to ${chatBot.elevenlabs}`);
                   io.emit(`${req.user.username}`, { audio: audioBase64, text: chunk });
                 }
               }
@@ -122,7 +124,6 @@ import('p-queue').then((PQueueModule) => {
       } else {
         console.error('Invalid textResponse format:', textResponse);
       }
-      res.json(updatedChat);
     } catch (err) {
       console.error(err);
       return res.status(500).json('Could not return that request');
