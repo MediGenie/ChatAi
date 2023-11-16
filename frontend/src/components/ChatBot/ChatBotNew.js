@@ -9,16 +9,13 @@ import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 
 function ChatBotNew(props){
   const [name, setName] = useState('');
-  const [prompt, setPrompt] = useState('');
-  const [from, setFrom] = useState('');
-  const [description, setDescription] = useState('');
+  const [systemprompt, setSystemPrompt] = useState('');
+  const [elevenlabs, setElevenLabs] = useState('');
+  const [context, setContext] = useState('');
   const [greeting, setGreeting] = useState('');
   const [image, setImage] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
   const errors = useSelector(state => state.errors.session);
-  // const [imagePrompt, setImagePrompt] = useState('');
-  // const aiProfileImages = useSelector(state => state.ui.images);
-  // const [loadingImage, setLoadingImage] = useState(false);
   const {form} = props;
   const history = useHistory();
   const dispatch = useDispatch();
@@ -36,10 +33,10 @@ function ChatBotNew(props){
   useEffect(()=>{
     if((form === 'edit' || form === 'clone') && chatbot){
       setName(chatbot.name);
-      if(chatbot.prompt) setPrompt(chatbot.prompt);
-      if(chatbot.from) setFrom(chatbot.from);
-      if(chatbot.description) setDescription(chatbot.description);
+      if(chatbot.systemprompt) setSystemPrompt(chatbot.systemprompt);
+      if(chatbot.elevenlabs) setElevenLabs(chatbot.elevenlabs);
       if(chatbot.greeting) setGreeting(chatbot.greeting);
+      if(chatbot.context) setContext(chatbot.context);
     }
 
   }, [chatbot, form])
@@ -53,20 +50,20 @@ function ChatBotNew(props){
       case 'name':
         setState = setName;
         break;
-      case 'prompt':
-        setState = setPrompt;
+      case 'systemprompt':
+        setState = setSystemPrompt;
         break;
-      case 'from':
-        setState = setFrom;
+      case 'greeting':
+        setState = setGreeting;
         break;
       // case 'imagePrompt':
       //   setState = setImagePrompt;
       //   break;
-      case 'description':
-        setState = setDescription;
+      case 'elevenlabs':
+        setState = setElevenLabs;
         break;
-      case 'greeting':
-        setState = setGreeting;
+      case 'context':
+        setState = setContext;
         break;
       default:
         throw Error('Unknown field in Form');
@@ -110,11 +107,11 @@ function ChatBotNew(props){
     
     const bot = {
       name,
-      from,
       image,
-      prompt,
-      description,
-      greeting
+      greeting,
+      systemprompt,
+      elevenlabs,
+      context
     };
 
     if(form === 'edit' || form === 'clone'){
@@ -143,52 +140,55 @@ function ChatBotNew(props){
   return (
       <div className="chatbot-form-container">
         <form className="chatbot-form" onSubmit={chatBotSubmit}>
-          <h2>{form === 'new' ? 'New Chatbot' : form === 'clone' ? 'Chatbot Clone' : 'Edit Chatbot'}</h2>
+          <h2>{form === 'new' ? 'New Influencer' : form === 'clone' ? 'Chatbot Clone' : 'Edit Chatbot'}</h2>
           <div className="errors">{errors?.name}</div>
           <div className='input-container'>
-            <label id={name && 'filled'}>*Name your chatbot</label>
+            <label id={name && 'filled'}>*Influencer Name</label>
             <input type="text"
               value={name}
               onChange={update('name')}
               // placeholder="What is their name?"
             />
           </div>
-          <div className="errors">{errors?.from}</div>
+
+          <div className="errors">{errors?.elevenlabs}</div>
           <div className='input-container'>
-            <label id={from && 'filled'}>From: Town, Universe, etc. to give context</label>
-            <input type="text"
-              value={from}
-              onChange={update('from')}
-              // placeholder="Town, Universe, etc. to give context to your chatbot."
-            />
-          </div>
-          <div className="errors">{errors?.description}</div>
-          <div className='input-container'>
-            <label id={description && 'filled'}>Description: How does it perceive itself?</label>
+            <label id={elevenlabs && 'filled'}>Eleven Labs</label>
             <textarea
-              value={description}
-              onChange={update('description')}
+              value={elevenlabs}
+              onChange={update('elevenlabs')}
               // placeholder="How does the chatbot perceive itself?"
             />
           </div>
           <div className="errors">{errors?.greeting}</div>
           <div className='input-container'>
-            <label id={greeting && 'filled'}>*Greeting: How does it introduce itself?</label>
+            <label id={greeting && 'filled'}>Greeting</label>
             <textarea
               value={greeting}
-              onChange={update('greeting')}
               // onInput='this.style.height = "";this.style.height = this.scrollHeight + "px"'
+              onChange={update('greeting')}
               // style={{overflow: 'hidden'}}
-              // placeholder="How does the chatbot introduce itself?"
+              // placeholder="Details about your chatbot so it acts the way you want."
             />
           </div>
-          <div className="errors">{errors?.prompt}</div>
+          <div className="errors">{errors?.systemprompt}</div>
           <div className='input-container'>
-            <label id={prompt && 'filled'}>Additional Prompt: How should it act?</label>
+            <label id={systemprompt && 'filled'}>System Prompt</label>
             <textarea
-              value={prompt}
+              value={systemprompt}
               // onInput='this.style.height = "";this.style.height = this.scrollHeight + "px"'
-              onChange={update('prompt')}
+              onChange={update('systemprompt')}
+              // style={{overflow: 'hidden'}}
+              // placeholder="Details about your chatbot so it acts the way you want."
+            />
+          </div>
+          <div className="errors">{errors?.context}</div>
+          <div className='input-container'>
+            <label id={context && 'filled'}>Context</label>
+            <textarea
+              value={context}
+              // onInput='this.style.height = "";this.style.height = this.scrollHeight + "px"'
+              onChange={update('context')}
               // style={{overflow: 'hidden'}}
               // placeholder="Details about your chatbot so it acts the way you want."
             />
@@ -204,7 +204,7 @@ function ChatBotNew(props){
           <input
             type="submit"
             value={form === 'edit' ? 'Save' : 'Create'}
-            disabled={!name || !greeting}
+            disabled={!name || !systemprompt || !elevenlabs}
           />
           </form>
           {/* {loadingImage? <div className='loading'>Loading...</div> : null} */}

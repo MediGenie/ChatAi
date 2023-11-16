@@ -10,6 +10,14 @@ const userSchema = Schema({
     type: String,
     required: true
   },
+  age: {
+    type: Number,
+    required: false
+  },
+  location: {
+    type: String,
+    required: false
+  },
   hashedPassword: {
     type: String,
     required: true

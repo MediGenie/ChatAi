@@ -5,6 +5,8 @@ import { signup, clearSessionErrors } from '../../store/session';
 function SignupForm () {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
+  const [age, setage] = useState('');
+  const [location, setlocation] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [image, setImage] = useState(null);
@@ -35,6 +37,12 @@ function SignupForm () {
       case 'password2':
         setState = setPassword2;
         break;
+      case 'age':
+        setState = setage;
+        break;
+      case 'location':
+        setState = setlocation;
+        break;
       default:
         throw Error('Unknown field in Signup Form');
     }
@@ -60,6 +68,8 @@ function SignupForm () {
     const user = {
       email,
       username,
+      age,
+      location,
       image,
       password
     };
@@ -79,6 +89,24 @@ function SignupForm () {
             onChange={update('email')}
             placeholder="Email"
           />
+        </label>
+        <div className="errors">{errors?.age}</div>
+        <label>
+          <span>Age</span>
+          <input type="text"
+            value={age}
+            onChange={update('age')}
+            placeholder="Age"
+          />
+        </label>
+        <div className="errors">{errors?.location}</div>
+        <label>
+          <span>Location</span>
+          <input type="text"
+            value={location}
+            onChange={update('location')}
+            placeholder="Location"
+          />  
         </label>
         <div className="errors">{errors?.username}</div>
         <label>

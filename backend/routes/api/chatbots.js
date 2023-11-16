@@ -7,7 +7,6 @@ const Chat = mongoose.model('Chat');
 const { requireUser } = require('../../config/passport');
 const { singleFileUpload, singleMulterUpload, retrievePrivateFile } = require("../../awsS3");
 
-
 //gets all chatBots for index page
 router.get('/', requireUser, async (req, res) => {
   try {
@@ -104,11 +103,9 @@ router.post('/', singleMulterUpload("image"),  requireUser, async (req, res, nex
     const newChatBot = new ChatBot({
       name: req.body.name,
       profileImageUrl,
-      prompt: req.body.prompt,
-      from: req.body.from,
-      description: req.body.description,
-      greeting: req.body.greeting,
-      featured: false,
+      systemprompt: req.body.systemprompt,
+      context: req.body.context,
+      elevenlabs: req.body.elevenlabs,
       author: req.user
     });
     let chatBot = await newChatBot.save();
@@ -139,10 +136,9 @@ router.patch('/:id', singleMulterUpload("image"), requireUser, async (req, res, 
       chatbot.profileImageUrl;
   try{
     chatbot.name = req.body.name || chatbot.name;
-    chatbot.prompt = req.body.prompt || chatbot.prompt;
-    chatbot.from = req.body.from || chatbot.from;
-    chatbot.description = req.body.description || chatbot.description;
-    chatbot.greeting = req.body.greeting || chatbot.greeting;
+    chatbot.systemprompt = req.body.systemprompt || chatbot.systemprompt;
+    chatbot.context = req.body.context || chatbot.context;
+    chatbot.elevenlabs = req.body.elevenlabs || chatbot.elevenlabs;
     await chatbot.save();
     chatbot = await chatbot.populate("author", "_id username profileImageUrl");
     if(!chatbot.profileImageUrl.includes('aws') ){

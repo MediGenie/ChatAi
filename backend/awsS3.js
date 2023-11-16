@@ -1,25 +1,24 @@
-const AWS = require("aws-sdk");
+const { S3Client, PutObjectCommand, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const multer = require("multer");
-const s3 = new AWS.S3({ apiVersion: "2006-03-01" });
-const NAME_OF_BUCKET = "pet-network-dev"; // <-- Use your bucket name here
+const s3 = new S3Client({ apiVersion: "2006-03-01", region: "ap-northeast-2" });
+const NAME_OF_BUCKET = "influencer-medigenie-ai"; // <-- Use your bucket name here
 
 const singleFileUpload = async ({ file, public = false }) => {
   const { originalname, buffer } = file;
   const path = require("path");
 
-  // Set the name of the file in your S3 bucket to the date in ms plus the
-  // extension name.
   const Key = new Date().getTime().toString() + path.extname(originalname);
   const uploadParams = {
     Bucket: NAME_OF_BUCKET,
     Key: public ? `public/${Key}` : Key,
     Body: buffer
   };
-  const result = await s3.upload(uploadParams).promise();
 
-  // Return the link if public. If private, return the name of the file in your
-  // S3 bucket as the key in your database for subsequent retrieval.
-  return public ? result.Location : result.Key;
+  const command = new PutObjectCommand(uploadParams);
+  const result = await s3.send(command);
+
+  return public ? `https://${NAME_OF_BUCKET}.s3.amazonaws.com/${uploadParams.Key}` : uploadParams.Key;
 };
 
 const multipleFilesUpload = async ({files, public = false}) => {
@@ -30,15 +29,22 @@ const multipleFilesUpload = async ({files, public = false}) => {
   );
 };
 
-const retrievePrivateFile = (key) => {
-  let fileUrl;
+const retrievePrivateFile = async (key) => {
   if (key) {
-    fileUrl = s3.getSignedUrl("getObject", {
+    const command = new GetObjectCommand({
       Bucket: NAME_OF_BUCKET,
       Key: key
     });
+
+    try {
+      const url = await getSignedUrl(s3, command, { expiresIn: 3600 }); // Expires in 1 hour
+      return url;
+    } catch (error) {
+      console.error("Error generating signed URL", error);
+      return null;
+    }
   }
-  return fileUrl || key;
+  return null;
 };
 
 const storage = multer.memoryStorage({

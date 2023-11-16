@@ -9,6 +9,10 @@ const validateRegisterInput = [
     .exists({ checkFalsy: true })
     .isEmail()
     .withMessage('Email is invalid'),
+  check('age')
+    .exists({ checkFalsy: true })
+    .isInt({ min: 18, max: 120 })
+    .withMessage('Must be at least 18 years old'),
   check('username')
     .exists({ checkFalsy: true })
     .isLength({ min: 2, max: 30 })

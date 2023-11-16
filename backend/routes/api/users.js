@@ -49,7 +49,9 @@ router.post('/register', singleMulterUpload("image"), validateRegisterInput, asy
   const newUser = new User({
     username: req.body.username,
     profileImageUrl,
-    email: req.body.email
+    email: req.body.email,
+    age: req.body.age,
+    location: req.body.location
   });
 
   // Salt password and save
@@ -96,7 +98,9 @@ router.get('/current', restoreUser, (req, res) => {
     _id: req.user._id,
     username: req.user.username,
     profileImageUrl: req.user.profileImageUrl.includes('aws') ? req.user.profileImageUrl : retrievePrivateFile(req.user.profileImageUrl),
-    email: req.user.email
+    email: req.user.email,
+    age: req.user.age,
+    location: req.user.location
   });
 });
 
