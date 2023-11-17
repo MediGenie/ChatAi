@@ -169,7 +169,7 @@ function ChatBotShow(){
                 <h1>{bot?.name}</h1>
               </div> */}
             <ul className="chatbot-show-details">
-              {/* {bot?.author.name && <h1 className="chat-header">Chat with {bot?.name}{bot?.author.name !== 'admin' ? ` (@${bot?.author.name})`: null}</h1>} */}
+              {/* {bot?.email.name && <h1 className="chat-header">Chat with {bot?.name}{bot?.email.name !== 'admin' ? ` (@${bot?.email.name})`: null}</h1>} */}
               <div className='chatbot-show-box'>
                 <ul>
                     {bot?.name && <div>

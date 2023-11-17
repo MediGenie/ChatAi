@@ -34,19 +34,7 @@ const { faker } = require('@faker-js/faker');
 //   )
 // }
   
-// // Create posts
-// const posts = [];
 
-// for (let i = 0; i < NUM_SEED_POSTS; i++) {
-//   posts.push(
-//     new Post ({
-//       text: faker.hacker.phrase(),
-//       author: users[Math.floor(Math.random() * NUM_SEED_USERS)]._id
-//     })
-//   )
-// }
-    
-// // Connect to database
 mongoose
   .connect(db, { useNewUrlParser: true })
   .then(() => {

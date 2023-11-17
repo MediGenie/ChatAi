@@ -47,7 +47,7 @@ router.post('/', requireUser, async (req, res) => {
   const chatBot = await ChatBot.findOne({_id: req.body.chatBotId})
   try {
       const newChat = new Chat ({
-        author: req.user,
+    author: req.user,
     chatBot: chatBot,
     messages: []
   });
@@ -129,45 +129,6 @@ import('p-queue').then((PQueueModule) => {
       return res.status(500).json('Could not return that request');
     }
   });
-});
-
-router.delete('/:id', requireUser, async (req, res) => {
-  const chat = await Chat.findOne({ _id: req.params.id, author: {_id: req.user._id}})
-  if(!chat) {
-    const err = new Error("Validation Error");
-    err.statusCode = 400;
-    const errors = {};
-    err.errors = errors;
-    errors.userId = "You are not the owner of this Chat";
-    return next(err);
-  }
-
-  try{
-    // await Chat.deleteOne({_id: req.params.id})
-    // return res.json('Successfully Deleted')
-    chat.messages = [];
-    const updatedChat = await chat.save();
-    return res.json(updatedChat);
-  }catch(err) {
-    next(err);
-  }
-});
-
-router.delete('/chatbot/:chatbotId', requireUser, async (req, res) => {
-  
-  try{
-    const chat = await Chat.deleteOne({ chatBot: req.params.chatbotId, author: {_id: req.user._id}})
-    // if(!chat) {
-    //   const err = new Error("Validation Error");
-    //   err.statusCode = 400;
-    //   const errors = {};
-    //   err.errors = errors;
-    //   errors.userId = "You are not the owner of this Chat";
-    // }
-    return chat;
-  }catch(err) {
-    console.log(err);
-  }
 });
 
 

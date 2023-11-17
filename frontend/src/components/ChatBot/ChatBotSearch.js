@@ -45,7 +45,6 @@ const ChatBotSearch = () =>{
                                         <li>{bot.name}</li>
                                         {/* {bot.description ? <li>{bot.description}</li>: null} */}
                                         {bot.featured ? <li><strong className='star'><AiFillStar/></strong>Featured Chatbot<strong className='star'><AiFillStar/></strong></li>: null}
-                                        {bot.author.name !== 'admin' ? <li>Created by: {bot.author.name}</li>: null}
                                         <div className='search-chat-button'>{chatted.includes(bot._id) ? <Link to={`/chatbots/${bot._id}`} id="resume-button">Resume Chat</Link> : <button onClick={clickHandler(bot._id)} id="chat-button"> Start Chat</button>}</div>
                                     </div>
                                 </li>

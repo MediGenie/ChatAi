@@ -43,30 +43,45 @@ router.get('/', requireUser, async (req, res) => {
 
 //gets chatBot and the signedIn user's messages with that bot
 router.get('/:id', requireUser, async (req, res, next) => {
-  let chatbot = null;
+  let chatbot;
   try {
-    chatbot = await ChatBot.findById(req.params.id)
-                    .populate("author", "_id name");
-    if (!chatbot.profileImageUrl.includes('aws')) {
-      chatbot.profileImageUrl = await retrievePrivateFile(chatbot.profileImageUrl); // Added await
-      console.log(`Retrieved S3 URL for chatbot ${chatbot._id}: ${chatbot.profileImageUrl}`); // Log the URL
+    chatbot = await ChatBot.findById(req.params.id).populate("author", "_id name");
+    if (!chatbot) {
+      const error = new Error('Chatbot not found');
+      error.statusCode = 404;
+      error.errors = { message: "No chatbot found with that id" };
+      return next(error);
     }
+
+    if (!chatbot.profileImageUrl.includes('aws')) {
+      chatbot.profileImageUrl = await retrievePrivateFile(chatbot.profileImageUrl);
+      console.log(`Retrieved S3 URL for chatbot ${chatbot._id}: ${chatbot.profileImageUrl}`);
+    }
+
+    // Check if the user is the author of the chatbot
+    if (!chatbot.author._id.equals(req.user._id)) {
+      // User is not the author, create a new chat with the user as the author
+      let newChat = new Chat({
+        chatBot: chatbot._id,
+        author: req.user._id,
+        // Copy other necessary details from chatbot if needed
+      });
+
+      await newChat.save();
+      console.log(`New chat created for user ${req.user._id} with chatbot ${chatbot._id}`);
+      return res.json({ chat: newChat, chatbot });
+    }
+
+    // If the user is the author, return the existing chat
+    let chat = await Chat.findOne({ chatBot: chatbot, author: req.user });
+    if (!chat) chat = {};
+    return res.json({ chat, chatbot });
   } catch (err) {
-    console.error("Error in '/:id' route:", err); // Log the error
-    const error = new Error('Chatbot not found');
-    error.statusCode = 404;
-    error.errors = { message: "No chatbot found with that id" };
-    return next(error);
+    console.error("Error in GET '/:id' route:", err);
+    return next(err);
   }
-  try {
-    let chat = await Chat.findOne({ chatBot: chatbot, author: req.user})
-    if(!chat) chat = {};
-    return res.json({chat, chatbot})
-  } catch(err){
-    return res.json([]);
-  }
-  
 });
+
 
 
 //gets all chatbots created by a user
