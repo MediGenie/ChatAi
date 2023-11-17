@@ -33,7 +33,7 @@ function ChatBotShow(){
   const newResponse = useSelector(state => state.entities.chats?.new);
 
   const chatEndRef = useRef(null);
-  const socket = io('http://localhost:5001');
+  const socket = io('http://meverse.kr:5001');
   
   const scrollToBottomChat = ()=>{
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -68,9 +68,12 @@ function ChatBotShow(){
       // Optionally handle text messages if needed
     });
   
-    return () => socket.on('disconnect', () => {
-      console.log('Disconnected from WebSocket server');
-    });
+    return () => {
+      socket.off('connect');
+      socket.off('error');
+      socket.off(`${sessionUser?.name}`);
+      socket.disconnect();
+    };
   }, [sessionUser?.name]);
 
 

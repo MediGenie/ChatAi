@@ -30,7 +30,7 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
         const response = await openai.createChatCompletion({
             model: "gpt-4-1106-preview",
             messages: messages,
-            temperature: 0.1
+            temperature: 0
         });
         return response.data.choices[0].message;
     } catch (error) {

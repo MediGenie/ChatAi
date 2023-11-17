@@ -20,9 +20,16 @@ const csrfRouter = require('./routes/api/csrf');
 const chatbotsRouter = require('./routes/api/chatbots');
 const chatsRouter = require('./routes/api/chats');
 
+const corsOptions = {
+  origin: 'http://meverse.kr', // Replace with the exact URL of your React app
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204
+};
+
 
 const app = express();
-
+app.use(cors(corsOptions));
 app.use(logger('dev')); // log request components (URL/method) to terminal
 app.use(express.json()); // parse JSON request body
 app.use(express.urlencoded({ extended: false })); // parse urlencoded request body
@@ -30,7 +37,6 @@ app.use(cookieParser()); // parse cookies as an object on req.cookies
 app.use(passport.initialize());
 
 // Security Middleware
-if (!isProduction) {
   // Enable CORS only in development because React will be on the React
   // development server (http://localhost:3000). (In production, the Express 
   // server will serve the React files statically.)
@@ -38,7 +44,7 @@ if (!isProduction) {
     res.setHeader('Referrer-Policy', 'no-referrer'); // Sets a more restrictive policy
     next();
   });
-}
+
 
 // Set the _csrf token and create req.csrfToken method to generate a hashed
 // CSRF token
@@ -57,6 +63,8 @@ app.use('/api/users', usersRouter);
 app.use('/api/csrf', csrfRouter);
 app.use('/api/chatbots', chatbotsRouter);
 app.use('/api/chats', chatsRouter);
+
+
 
 
 // Serve static React build files statically in production
