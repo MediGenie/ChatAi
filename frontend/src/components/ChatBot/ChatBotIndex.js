@@ -78,7 +78,7 @@ function ChatBotIndex(){
       <div className="chatbots-index-container">
 
         <div className="chatted-container">
-          <h1>AI Assistants</h1>
+          <h1></h1>
           {chatted?.length ?
             <Swiper
             modules={[Navigation, Pagination, Scrollbar]}
@@ -106,7 +106,7 @@ function ChatBotIndex(){
                   </SwiperSlide>
                 )
               })}
-            </Swiper>: <div className="no-chatbot-message"> No Chatbots Chatted Yet!</div>
+            </Swiper>: <div className="no-chatbot-message"></div>
           }
         </div>
         {/* <div className="created-container">

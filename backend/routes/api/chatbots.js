@@ -58,24 +58,23 @@ router.get('/:id', requireUser, async (req, res, next) => {
       console.log(`Retrieved S3 URL for chatbot ${chatbot._id}: ${chatbot.profileImageUrl}`);
     }
 
-    // Check if the user is the author of the chatbot
-    if (!chatbot.author._id.equals(req.user._id)) {
-      // User is not the author, create a new chat with the user as the author
-      let newChat = new Chat({
+    // First, try to find an existing chat with this chatbot and the current user
+    let chat = await Chat.findOne({ chatBot: chatbot._id, author: req.user._id });
+
+    if (!chat) {
+      // If no existing chat, create a new chat
+      chat = new Chat({
         chatBot: chatbot._id,
         author: req.user._id,
-        // Copy other necessary details from chatbot if needed
+        // Add other necessary fields if required
       });
-
-      await newChat.save();
+      await chat.save();
       console.log(`New chat created for user ${req.user._id} with chatbot ${chatbot._id}`);
-      return res.json({ chat: newChat, chatbot });
     }
 
-    // If the user is the author, return the existing chat
-    let chat = await Chat.findOne({ chatBot: chatbot, author: req.user });
-    if (!chat) chat = {};
+    // Return the existing or new chat
     return res.json({ chat, chatbot });
+
   } catch (err) {
     console.error("Error in GET '/:id' route:", err);
     return next(err);
