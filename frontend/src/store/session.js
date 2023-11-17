@@ -27,10 +27,11 @@ export const clearSessionErrors = () => ({
   type: CLEAR_SESSION_ERRORS
 });
 
-export const signup = user => startSession(user, 'api/users/register');
-export const login = user => startSession(user, 'api/users/login');
+export const signup = (user, redirectUrl) => startSession(user, 'api/users/register', redirectUrl);
+export const login = (user, redirectUrl) => startSession(user, 'api/users/login', redirectUrl);
 
-const startSession = (userInfo, route) => async dispatch => {
+
+const startSession = (userInfo, route, redirectUrl) => async dispatch => {
   const { image, name, password, email, age, location } = userInfo;
   const formData = new FormData();
   formData.append("name", name);
@@ -39,16 +40,19 @@ const startSession = (userInfo, route) => async dispatch => {
   formData.append("age", age);
   formData.append("location", location);
 
-  if (image) formData.append("image", image);
   try {  
     const res = await jwtFetch(route, {
       method: "POST",
-      // body: JSON.stringify(userInfo)
       body: formData
     });
     const { user, token } = await res.json();
     localStorage.setItem('jwtToken', token);
-    return dispatch(receiveCurrentUser(user));
+    dispatch(receiveCurrentUser(user));
+
+    // Redirect after successful authentication
+    if (redirectUrl) {
+      window.location.href = redirectUrl;
+    }
   } catch(err) {
     const res = await err.json();
     if (res.statusCode === 400) {

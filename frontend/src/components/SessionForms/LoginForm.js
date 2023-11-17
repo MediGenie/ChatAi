@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { delay } from '../Util';
 import { useQuery } from '../Routes/Routes';
 import { login, clearSessionErrors } from '../../store/session';
@@ -15,11 +15,14 @@ function LoginForm () {
   const history = useHistory();
   const { query } = useQuery();
   const redirectPath = query.get('redirect');
+  console.log("Redirect Path:", redirectPath);  
   const signupUrlWithRedirect = redirectPath ? `/signup?redirect=${redirectPath}` : '/signup';
+  const location = useLocation();
 
   useEffect(() => {
+    console.log("Checking redirect: ", isLoggedIn, redirectPath);
     if (isLoggedIn) {
-      history.push(redirectPath || '/defaultRedirectPath');
+      history.push(redirectPath || '/chatbots');
     }
   }, [isLoggedIn, history, redirectPath]);
 
@@ -36,8 +39,9 @@ function LoginForm () {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login({ email, password })); 
-  }
+    const redirectUrl = query.get('redirect') || '/defaultRedirectPath';
+    dispatch(login({ email, password }, redirectUrl)); // Or dispatch(signup(...)) for SignupForm
+  };
 
   return (
     <div className='session-form-container'>
@@ -62,7 +66,9 @@ function LoginForm () {
         </label>
         <div className="errors">{errors?.password}</div>
         <input type="submit" value="Log In" disabled={!email || !password} />
-        <Link to={signupUrlWithRedirect}>Don't have an account? Sign up</Link>
+        <Link to={redirectPath ? `/signup?redirect=${redirectPath}` : '/signup'}>
+          Don't have an account? Sign up
+        </Link>
       </form>
     </div>
   );

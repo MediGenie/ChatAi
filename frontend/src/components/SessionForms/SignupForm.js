@@ -88,8 +88,8 @@ useEffect(() => {
       image,
       password
     };
-
-    dispatch(signup(user)); 
+  
+    dispatch(signup(user, redirectPath));
   }
 
   return (
