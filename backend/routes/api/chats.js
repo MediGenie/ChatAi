@@ -113,9 +113,9 @@ import('p-queue').then((PQueueModule) => {
                 const audioBase64 = await convertTextToAudio(chunk,chatBot.elevenlabs);
                 // If audio conversion was successful, handle the audio chunk here
                 if (audioBase64) {
-                  console.log(`Emitting audio to ${req.user.username}`);
+                  console.log(`Emitting audio to ${req.user.name}`);
                   console.log(`Emitting audio to ${chatBot.elevenlabs}`);
-                  io.emit(`${req.user.username}`, { audio: audioBase64, text: chunk });
+                  io.emit(`${req.user.name}`, { audio: audioBase64, text: chunk });
                 }
               }
             }

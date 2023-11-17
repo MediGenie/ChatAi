@@ -8,10 +8,10 @@ import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
 
 
 function ChatBotNew(props){
-  const [name, setName] = useState('');
-  const [systemprompt, setSystemPrompt] = useState('');
-  const [elevenlabs, setElevenLabs] = useState('');
-  const [context, setContext] = useState('');
+  const [name, setName] = useState('Default Name');
+  const [systemprompt, setSystemPrompt] = useState('Default System Prompt');
+  const [elevenlabs, setElevenLabs] = useState('Default Eleven Labs Info');
+  const [context, setContext] = useState('Default Context');
   const [image, setImage] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
   const errors = useSelector(state => state.errors.session);
@@ -190,12 +190,6 @@ function ChatBotNew(props){
             disabled={!name || !systemprompt || !elevenlabs}
           />
           </form>
-          {/* {loadingImage? <div className='loading'>Loading...</div> : null} */}
-          {/* {aiProfileImages?.map((image, i) => <img key={i} src={image.url} alt='profile' />)} */}
-          {/* <input type='text' value={imagePrompt}
-              onChange={update('imagePrompt')}
-              placeholder="Image imagePrompt"/> */}
-          {/* <button onClick={generateImage} disabled={!imagePrompt || loadingImage} >Generate Profile Picture</button> */}
 
         </div>
     );

@@ -13,7 +13,7 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
 
     // Build system prompt using chatBot and userInfo data
     const systemPromptParts = [
-        userInfo.username ? `This person you are talking to is ${userInfo.username}.` : '',
+        userInfo.name ? `This person you are talking to is ${userInfo.name}.` : '',
         userInfo.location ? `This person is from ${userInfo.location}.` : '',
         userInfo.age ? `This person is ${userInfo.age} years old.` : '',
         chatBot.systemprompt ? `from ${chatBot.systemprompt}` : '',

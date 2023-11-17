@@ -59,7 +59,7 @@ function ChatBotShow(){
     });
     
     // Listen for audio messages
-    socket.on(`${sessionUser?.username}`, (message) => {
+    socket.on(`${sessionUser?.name}`, (message) => {
       console.log('Received message:', message);
       if (message.audio) {
         console.log('Received audio message:', message.audio);
@@ -71,7 +71,7 @@ function ChatBotShow(){
     return () => socket.on('disconnect', () => {
       console.log('Disconnected from WebSocket server');
     });
-  }, [sessionUser?.username]);
+  }, [sessionUser?.name]);
 
 
   const handleIncomingAudio = async (data) => {
@@ -169,7 +169,7 @@ function ChatBotShow(){
                 <h1>{bot?.name}</h1>
               </div> */}
             <ul className="chatbot-show-details">
-              {/* {bot?.author.username && <h1 className="chat-header">Chat with {bot?.name}{bot?.author.username !== 'admin' ? ` (@${bot?.author.username})`: null}</h1>} */}
+              {/* {bot?.author.name && <h1 className="chat-header">Chat with {bot?.name}{bot?.author.name !== 'admin' ? ` (@${bot?.author.name})`: null}</h1>} */}
               <div className='chatbot-show-box'>
                 <ul>
                     {bot?.name && <div>
@@ -193,7 +193,7 @@ function ChatBotShow(){
                         : 
                         <div className='chatbot-show-message-detail'> 
                           <img className='chatbot-show-img-small' src={sessionUser?.profileImageUrl} alt={sessionUser?.name} />
-                          <h1>{sessionUser?.username} </h1>
+                          <h1>{sessionUser?.name} </h1>
                         </div>
                         }
                         {mess.content.split('\n').map((message, i)=>{

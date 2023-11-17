@@ -13,10 +13,10 @@ const validateRegisterInput = [
     .exists({ checkFalsy: true })
     .isInt({ min: 18, max: 120 })
     .withMessage('Must be at least 18 years old'),
-  check('username')
+  check('name')
     .exists({ checkFalsy: true })
     .isLength({ min: 2, max: 30 })
-    .withMessage('Username must be between 2 and 30 characters'),
+    .withMessage('name must be between 2 and 30 characters'),
   check('password')
     .exists({ checkFalsy: true })
     .isLength({ min: 6, max: 30 })

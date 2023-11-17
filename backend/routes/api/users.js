@@ -21,9 +21,9 @@ router.get('/', function(req, res, next) {
 // POST /api/users/register
 router.post('/register', singleMulterUpload("image"), validateRegisterInput, async (req, res, next) => {
   // Check to make sure no one has already registered with the proposed email or
-  // username.
+  // name.
   const user = await User.findOne({
-    $or: [{ email: req.body.email }, { username: req.body.username }]
+    $or: [{ email: req.body.email }]
   });
 
   if (user) {
@@ -33,9 +33,6 @@ router.post('/register', singleMulterUpload("image"), validateRegisterInput, asy
     const errors = {};
     if (user.email === req.body.email) {
       errors.email = "A user has already registered with this email";
-    }
-    if (user.username === req.body.username) {
-      errors.username = "A user has already registered with this username";
     }
     err.errors = errors;
     return next(err);
@@ -47,7 +44,7 @@ router.post('/register', singleMulterUpload("image"), validateRegisterInput, asy
       await singleFileUpload({ file: req.file, public: false}) :
       'https://pet-network-seeds.s3.us-west-1.amazonaws.com/purple-profile.jpg';
   const newUser = new User({
-    username: req.body.username,
+    name: req.body.name,
     profileImageUrl,
     email: req.body.email,
     age: req.body.age,
@@ -101,7 +98,7 @@ router.get('/current', restoreUser, async (req, res) => {
 
   res.json({
     _id: req.user._id,
-    username: req.user.username,
+    name: req.user.name,
     profileImageUrl: profileImageUrl,
     email: req.user.email,
     age: req.user.age,

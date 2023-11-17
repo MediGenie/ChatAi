@@ -4,7 +4,7 @@ import { signup, clearSessionErrors } from '../../store/session';
 
 function SignupForm () {
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
+  const [name, setname] = useState('');
   const [age, setage] = useState('');
   const [location, setlocation] = useState('');
   const [password, setPassword] = useState('');
@@ -28,8 +28,8 @@ function SignupForm () {
       case 'email':
         setState = setEmail;
         break;
-      case 'username':
-        setState = setUsername;
+      case 'name':
+        setState = setname;
         break;
       case 'password':
         setState = setPassword;
@@ -63,11 +63,11 @@ function SignupForm () {
   }
 
 
-  const usernameSubmit = e => {
+  const nameSubmit = e => {
     e.preventDefault();
     const user = {
       email,
-      username,
+      name,
       age,
       location,
       image,
@@ -79,7 +79,7 @@ function SignupForm () {
 
   return (
     <div className="session-form-container">
-      <form className="session-form" onSubmit={usernameSubmit}>
+      <form className="session-form" onSubmit={nameSubmit}>
         <h2>Sign Up</h2>
         <div className="errors">{errors?.email}</div>
         <label>
@@ -108,13 +108,13 @@ function SignupForm () {
             placeholder="Location"
           />  
         </label>
-        <div className="errors">{errors?.username}</div>
+        <div className="errors">{errors?.name}</div>
         <label>
-          <span>Username</span>
+          <span>name</span>
           <input type="text"
-            value={username}
-            onChange={update('username')}
-            placeholder="Username"
+            value={name}
+            onChange={update('name')}
+            placeholder="name"
           />
         </label>
         <div className="errors">{errors?.password}</div>
@@ -145,7 +145,7 @@ function SignupForm () {
         <input
           type="submit"
           value="Sign Up"
-          disabled={!email || !username || !password || password !== password2}
+          disabled={!email || !name || !password || password !== password2}
         />
       </form>
 

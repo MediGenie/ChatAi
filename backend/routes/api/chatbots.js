@@ -13,7 +13,7 @@ router.get('/', requireUser, async (req, res) => {
     let chatbots;
     if (!req.query.query) {
       chatbots = await ChatBot.find()
-                  .populate("author", "_id username")
+                  .populate("author", "_id name")
                   .sort({ name: 1 });
       for (const bot of chatbots) {
         if (!bot.profileImageUrl.includes('aws')) {
@@ -23,7 +23,7 @@ router.get('/', requireUser, async (req, res) => {
       }
     } else {
         chatbots = await ChatBot.find({"name": { "$regex": req.query.query, "$options": "i" }})  //$options of 'i' makes search case insensitive
-                    .populate("author", "_id username")
+                    .populate("author", "_id name")
         chatbots.forEach(bot=>{
           if(!bot.profileImageUrl.includes('aws') ){
             bot.profileImageUrl = retrievePrivateFile(bot.profileImageUrl)
@@ -46,7 +46,7 @@ router.get('/:id', requireUser, async (req, res, next) => {
   let chatbot = null;
   try {
     chatbot = await ChatBot.findById(req.params.id)
-                    .populate("author", "_id username");
+                    .populate("author", "_id name");
     if (!chatbot.profileImageUrl.includes('aws')) {
       chatbot.profileImageUrl = await retrievePrivateFile(chatbot.profileImageUrl); // Added await
       console.log(`Retrieved S3 URL for chatbot ${chatbot._id}: ${chatbot.profileImageUrl}`); // Log the URL
@@ -84,7 +84,7 @@ router.get('/user/:userId', requireUser, async (req, res, next) => {
   try {
     const chatBots = await ChatBot.find({ author: user })
                           .sort({ createdAt: -1 })
-                          .populate("author", "_id username profileImageUrl");
+                          .populate("author", "_id name profileImageUrl");
     for (const bot of chatBots) {
       if (!bot.profileImageUrl.includes('aws')) {
         bot.profileImageUrl = await retrievePrivateFile(bot.profileImageUrl); // Added await
@@ -113,7 +113,7 @@ router.post('/', singleMulterUpload("image"),  requireUser, async (req, res, nex
       author: req.user
     });
     let chatBot = await newChatBot.save();
-    chatBot = await chatBot.populate("author", "_id username profileImageUrl");
+    chatBot = await chatBot.populate("author", "_id name profileImageUrl");
     if (!chatBot.profileImageUrl.includes('aws')) {
       chatBot.profileImageUrl = await retrievePrivateFile(chatBot.profileImageUrl); // Added await
       console.log(`Retrieved S3 URL for new chatbot ${chatBot._id}: ${chatBot.profileImageUrl}`); // Log the URL
@@ -127,7 +127,7 @@ router.post('/', singleMulterUpload("image"),  requireUser, async (req, res, nex
 
 router.patch('/:id', singleMulterUpload("image"), requireUser, async (req, res, next) => {
   let chatbot = await ChatBot.findOne({ _id: req.params.id, author: {_id: req.user._id}})
-  if(!chatbot && req.user.username === 'admin') chatbot = await ChatBot.findOne({ _id: req.params.id})
+  if(!chatbot && req.user.name === 'admin') chatbot = await ChatBot.findOne({ _id: req.params.id})
   if(!chatbot) {
     const err = new Error("Validation Error");
     err.statusCode = 400;
@@ -145,7 +145,7 @@ router.patch('/:id', singleMulterUpload("image"), requireUser, async (req, res, 
     chatbot.context = req.body.context || chatbot.context;
     chatbot.elevenlabs = req.body.elevenlabs || chatbot.elevenlabs;
     await chatbot.save();
-    chatbot = await chatbot.populate("author", "_id username profileImageUrl");
+    chatbot = await chatbot.populate("author", "_id name profileImageUrl");
     if(!chatbot.profileImageUrl.includes('aws') ){
       chatbot.profileImageUrl = await retrievePrivateFile(chatbot.profileImageUrl)
     }
@@ -161,7 +161,7 @@ router.patch('/:id', singleMulterUpload("image"), requireUser, async (req, res, 
 
 router.delete('/:id',  requireUser, async (req, res, next) => {
   let chatbot = await ChatBot.findOne({ _id: req.params.id, author: {_id: req.user._id}})
-  if(!chatbot && req.user.username === 'admin') chatbot = await ChatBot.findOne({ _id: req.params.id})
+  if(!chatbot && req.user.name === 'admin') chatbot = await ChatBot.findOne({ _id: req.params.id})
   if(!chatbot) {
     const err = new Error("Validation Error");
     err.statusCode = 400;
