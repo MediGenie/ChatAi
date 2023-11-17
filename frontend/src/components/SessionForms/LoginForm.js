@@ -25,27 +25,7 @@ function LoginForm () {
     e.preventDefault();
     dispatch(login({ email, password })); 
   }
-  const handleDemo = async(e) => {
-    e.preventDefault();
-  
-    let emailArr = 'demo@user.com'.split('');
-    let passwordArr = '123456'.split('');
 
-    for (let i = 0; i < emailArr.length; i++) {
-      await delay(100)
-      setEmail(emailArr.slice(0,i+1).join(''))
-    }
-    for (let i = 0; i < passwordArr.length; i++) {
-      await delay(100)
-      setPassword(passwordArr.slice(0,i+1).join(''))
-    }
-    await delay(100);
-    dispatch(login({
-      email: 'demo@user.com',
-      password: '123456'
-    }))
-
-  }
 
   return (
     <div className='session-form-container'>
@@ -74,7 +54,7 @@ function LoginForm () {
           value="Log In"
           disabled={!email || !password}
         />
-        <div onClick={handleDemo} id="demo-button">Demo User Login</div>
+      
       </form>
     </div>
   );

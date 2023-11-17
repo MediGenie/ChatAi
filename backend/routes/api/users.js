@@ -68,8 +68,8 @@ router.post('/register', singleMulterUpload("image"), validateRegisterInput, asy
   });
 });
 
-router.post('/login', singleMulterUpload(""), validateRegisterInput, async (req, res, next) => {
-  passport.authenticate('local', validateLoginInput, async function(err, user) {
+router.post('/login', singleMulterUpload(""), validateLoginInput, async (req, res, next) => {
+  passport.authenticate('local', async (err, user, info) => {
     if (err) return next(err);
     if (!user) {
       const err = new Error('Invalid credentials');
@@ -80,7 +80,6 @@ router.post('/login', singleMulterUpload(""), validateRegisterInput, async (req,
     return res.json(await loginUser(user));
   })(req, res, next);
 });
-
 
 router.get('/current', restoreUser, async (req, res) => {
   if (!isProduction) {
