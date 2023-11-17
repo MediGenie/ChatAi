@@ -37,12 +37,7 @@ function NavBar () {
         </div>
       );
     } else {
-      return (
-        <div className="links-auth">
-          <Link to={'/signup'}>Signup</Link>
-          <Link to={'/login'}>Login</Link>
-        </div>
-      );
+      return 
     }
   }
 
@@ -51,7 +46,7 @@ function NavBar () {
       <div className="nav-left">
         {/* <Link to='/'><img className='logo' src={gpt} alt='logo' /></Link> */}
         <div id='chat-logo-title'>
-          <Link to='/' ><h1 id='chat-title'>MediGenie</h1></Link>
+          <Link to='/' ><h1 id='chat-title'>Influence AI</h1></Link>
         </div>
         
       </div>

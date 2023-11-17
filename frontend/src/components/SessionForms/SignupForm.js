@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { signup, clearSessionErrors } from '../../store/session';
+import { useHistory } from 'react-router-dom';
+import { useQuery } from '../Routes/Routes'; 
+import { Link } from 'react-router-dom';
 
 function SignupForm () {
   const [email, setEmail] = useState('');
@@ -11,6 +14,18 @@ function SignupForm () {
   const [password2, setPassword2] = useState('');
   const [image, setImage] = useState(null);
   const [photoUrl, setPhotoUrl] = useState(null);
+  const { query } = useQuery();
+const redirectPath = query.get('redirect');
+const history = useHistory();
+const isLoggedIn = useSelector(state => !!state.session.user); // Adjust based on your state management
+const loginUrlWithRedirect = redirectPath ? `/login?redirect=${redirectPath}` : '/login';
+
+
+useEffect(() => {
+  if (isLoggedIn) {
+    history.push(redirectPath || '/defaultRedirectPath');
+  }
+}, [isLoggedIn, history, redirectPath]);
 
   const errors = useSelector(state => state.errors.session);
   const dispatch = useDispatch();
@@ -147,6 +162,9 @@ function SignupForm () {
           value="Sign Up"
           disabled={!email || !name || !password || password !== password2}
         />
+          <div className="form-footer">
+        Already have an account? <Link to={loginUrlWithRedirect}>Log in</Link>
+      </div>
       </form>
 
     </div>
