@@ -14,6 +14,10 @@ const chatSchema = Schema({
     type: [Object],
     required: true
   },
+  messages_images: {
+    type: [Object],
+    required: true
+  },
 }, {
   timestamps: true
 });

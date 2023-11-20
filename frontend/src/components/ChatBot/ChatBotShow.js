@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom/cjs/react-router-dom.min";
 import typingGif from "../../assets/typing-text.gif";
 import { delay } from "../Util";
 import {BiSolidSend} from 'react-icons/bi';
+import { BsCloudUpload } from "react-icons/bs";
 import {SlOptions} from 'react-icons/sl';
 import {TbError404} from 'react-icons/tb';
 import io from 'socket.io-client';
@@ -16,14 +17,16 @@ function ChatBotShow(){
   const {chatBotId} = useParams();
   const bot = useSelector(state => state.entities.chatBots?.new ? state.entities.chatBots.new: null  )
   const sessionUser = useSelector(state => state.session?.user);
-
+  const [imageFile, setImageFile] = useState(null);
   const [request, setRequest] = useState('');
   const [response, setResponse] = useState('');
+  const fileInputRef = useRef(null);
   const [botLoaded, setBotLoaded] = useState(false);
   const [loadingResponse, setLoadingResponse] = useState(false); //shows message loading gif
   const [loadingChat, setLoadingChat] = useState(false); //disables chat until message finishes
-
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [messages, setMessages] = useState([]);
   
   const [audioQueue, setAudioQueue] = useState([]);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -34,10 +37,83 @@ function ChatBotShow(){
 
   const chatEndRef = useRef(null);
   const socket = io('http://meverse.kr:5001');
-  
+    
+ 
   const scrollToBottomChat = ()=>{
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
+
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageUploadClick = (e) => {
+    e.preventDefault();
+    fileInputRef.current.click();
+  };
+   
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+  
+      const resizeImage = (file, maxWidth, maxHeight, callback) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+  
+            if (width > height) {
+              if (width > maxWidth) {
+                height *= maxWidth / width;
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width *= maxHeight / height;
+                height = maxHeight;
+              }
+            }
+  
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const resizedDataUrl = canvas.toDataURL(file.type);
+            callback(resizedDataUrl);
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      };
+  
+      if (file.size > 548576) { // if image is larger than 1MB
+        resizeImage(file, 512, 512, (resizedBase64) => {
+          setImageFile(resizedBase64.replace('data:', '').replace(/^.+,/, ''));
+          setImagePreviewUrl(resizedBase64); // Set resized image for preview
+          console.log('Resized image:', resizedBase64); // Log resized image data
+        });
+      } else {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
+          setImageFile(base64String);
+          setImagePreviewUrl(reader.result); // Set image preview URL
+          console.log('Image file base64:', base64String); // Log base64 image data
+        };
+        reader.readAsDataURL(file);
+      }
+      console.log('Image file:', file); // Log file details
+    }
+  };
+  
+
+  const clearImagePreview = () => {
+    setImagePreviewUrl(null);
+    setImageFile(null);
+  };
 
   useEffect(()=>{
 
@@ -49,6 +125,7 @@ function ChatBotShow(){
     // dispatch(clearChatResponse())
   }, [bot])
 
+  
   useEffect(() => {
     socket.on('connect', () => {
       console.log('Connected to WebSocket server');
@@ -100,6 +177,7 @@ function ChatBotShow(){
     audio.play();
     audioPlayerRef.current = audio;
   };
+  
 
 
   useEffect(()=>{
@@ -118,32 +196,61 @@ function ChatBotShow(){
     setLoadingChat(false)
   }
 
-  useEffect(()=>{
+  useEffect(() => {
+    // Query all user message elements
+    const userMessages = document.querySelectorAll('.user-message-selector');
+    // Apply the new class to each user message element
+    userMessages.forEach(el => {
+      el.classList.add('user-show-message-detail');
+    });
+  }, []);
+
+  useEffect(() => {
     scrollToBottomChat();
-  }, [chat, response])
+  }, [chat?.messages]); // Assuming 'chat?.messages' holds the array of messages
+
   
   useEffect(()=>{
     setTimeout(scrollToBottomChat, 500) //had to add a delay so typing gif has time to load before the scroll occurs
   }, [loadingChat])
   
   const handleChange = (e) => {
-    setRequest(e.target.value);
-  }
-  
-  const handleSubmit = async(e)=>{
-    e.preventDefault();
-    try {
-      dispatch(receiveChatRequest(request))
-      setRequest("");
-      setResponse("");
-      setLoadingChat(true); //disables user ability to send messages
-      setLoadingResponse(true); //brings up the typing message gif
-      dispatch(fetchChatResponse(chat._id, {role: 'user', content: request})).then(()=>setLoadingResponse(false));
-    } catch (err) {
-      console.log(err)
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent the default action to stop from submitting the form
+      handleSubmit(e); // Call the submit function
+    } else {
+      console.log('Text input changed:', e.target.value); // Log text input change
+      setRequest(e.target.value);
     }
+    document.querySelector(".show-chat-form-input").scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setRequest(""); // Clear the input field immediately
+    setLoadingChat(true);
+    setLoadingResponse(true);
+  
+    const formData = new FormData();
+    if (request.trim()) {
+      formData.append('text', request.trim());
+    }
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+    setImagePreviewUrl(null); // Clear image preview
+  
+    try {
+      await dispatch(fetchChatResponse(chat._id, formData)).then(() => {
+        setLoadingResponse(false);
+        setImageFile(null);
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingChat(false);
+    }
+  };
 
-  }
 
   const popup = ()=>{
     return (
@@ -183,28 +290,32 @@ function ChatBotShow(){
                       <h2>{bot.name}</h2>
                     </div>
                     }
-                  {chat?.messages?.map((mess, i)=>{
+                  {chat?.messages_images?.map((mess, i)=>{
                     
-                    return(
+                    return (
                       <div key={i}>
                         {mess.role === 'assistant' 
-                        ? 
-                        <div className='chatbot-show-message-detail'> 
-                          <img className='chatbot-show-img-small' src={bot?.profileImageUrl} alt={bot?.name} />
-                          <h1>{bot?.name} </h1>
-                        </div>
-                        : 
-                        <div className='chatbot-show-message-detail'> 
-                          <img className='chatbot-show-img-small' src={sessionUser?.profileImageUrl} alt={sessionUser?.name} />
-                          <h1>{sessionUser?.name} </h1>
-                        </div>
+                          ? <div className='chatbot-show-message-detail'> 
+                              <img className='chatbot-show-img-small' src={bot?.profileImageUrl} alt={bot?.name} />
+                              <h1>{bot?.name}</h1>
+                            </div>
+                          : <div className='chatbot-show-message-detail'> 
+                              <img className='chatbot-show-img-small' src={sessionUser?.profileImageUrl} alt={sessionUser?.name} />
+                              <h1>{sessionUser?.name}</h1>
+                            </div>
                         }
-                        {mess.content.split('\n').map((message, i)=>{
-                          return <h2 key={i}>{message}</h2>
+                        {mess.content.split('\n').map((message, j) => {
+                          return <h2 key={j}>{message}</h2>
                         })}
-                        
+                  
+                        {/* Render the base64 image if it exists in the message */}
+                        {mess.image && (
+                          <div className="chat-message-image-container-chat">
+                            <img src={`data:image/jpeg;base64,${mess.image}`} alt="Chat Message" className="chat-message-image"/>
+                          </div>
+                        )}
                       </div>
-                    ) 
+                    );
                   })}
                   {response &&<div className="chatbot-show-response">
                      <div className='chatbot-show-message-detail'> 
@@ -214,6 +325,7 @@ function ChatBotShow(){
                     { response && response.split('\n').map((message)=>{
                           return <h2>{message}</h2>
                         }) }
+                        
                   </div>}
                   {loadingResponse ? <img className='typing' src={typingGif} alt='gif'/> : null}
                   <div className='ref-div' ref={chatEndRef} />
@@ -222,11 +334,51 @@ function ChatBotShow(){
             </ul>
       </div>
       {bot?.name &&<div className='chatbot-show-message-form-container'>
+
+
         <form className="show-chat-form" onSubmit={handleSubmit}>
-          <input type='text' className="show-chat-form-input" onChange={handleChange} value={request} placeholder={`Send a message to ${bot?.name}`}/>
-          <button className='chat-form-button' disabled={loadingChat || !request.length}><BiSolidSend /></button>
+        <div className="chatbot-show-message-form-container">
+        <div className="input-with-image-preview">
+          {imagePreviewUrl && (
+            <div className="image-preview-inside-input">
+              <img src={imagePreviewUrl} alt="Preview" />
+              <button onClick={clearImagePreview} className="cancel-image-preview-button">×</button>
+            </div>
+          )}
+         <input 
+  type='text' 
+  className="show-chat-form-input" 
+  onChange={handleChange} 
+  onKeyDown={handleChange} // Add this line
+  value={request} 
+  placeholder={`Send a message to ${bot?.name}`}
+/>
+        </div>
+        <button 
+          type="button"
+          className="chat-form-button-image" 
+          onClick={triggerFileInput}
+          disabled={loadingChat}
+        >
+          <BsCloudUpload />
+        </button>
+        <button 
+          type="submit"
+          className="chat-form-button" 
+          disabled={loadingChat}
+        >
+          <BiSolidSend />
+        </button>
+        <input
+          type="file"
+          onChange={handleImageChange}
+          accept="image/*"
+          style={{ display: 'none' }}
+          ref={fileInputRef}
+        />
+      </div>
         </form>
-        <button className='chat-form-button' onClick={()=> showMenu ? setShowMenu(false) : setShowMenu(true)}><SlOptions/></button>
+        
       </div>}
       {showMenu && popup()}
     </>

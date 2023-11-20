@@ -7,13 +7,98 @@ const {getAiResponse} = require('../../openAi');
 const { requireUser } = require('../../config/passport');
 const { convertTextToAudio } = require('./fetchAPI.js');
 const socket = require('../../config/socket');
-
-
+const multer = require('multer');
+const fs = require('fs');
+const upload = multer();
 
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
+
+  import('p-queue').then((PQueueModule) => {
+    const queue = new PQueueModule.default({ concurrency: 1 });
   
+    router.patch('/:id', requireUser, upload.single('imageBase64'), async (req, res) => {
+      try {
+        const chat = await Chat.findOne({ _id: req.params.id, author: { _id: req.user._id } })
+          .populate('chatBot', '_id name');
+        const chatBot = await ChatBot.findOne({ _id: chat.chatBot._id });
+        const io = socket.getIO();
+        // Extract text and base64 image from the request body
+        const text = req.body.text;
+        const base64Image = req.body.image;
+        // Construct chat request object
+        const chatRequest = {
+          text: text,
+          image: base64Image
+        };
+
+        const formattedMessage = { role: 'user', content: chatRequest.text };
+        const formattedMessageImage = { role: 'user', content: chatRequest.text, image: chatRequest.image };
+        // Get AI response
+        const textResponse = await getAiResponse(chatBot, chat, chatRequest, req.user);
+        chat.messages = [...chat.messages,formattedMessage, textResponse]
+        chat.messages_images = [...chat.messages_images,formattedMessageImage, textResponse]
+        console.log('Chat response:', chat.messages);
+        //const updatedChat = await chat.save();
+
+        const updatedChat = await chat.save();
+
+        res.json(updatedChat);
+  
+        // Process the text response
+        if (textResponse && typeof textResponse.content === 'string') {
+          // Split text into sentences
+          const punctuationRegex = /(?:[^.!?。]|\b\w+\.\b)+[.!?。]*/g;
+          const sentences = textResponse.content.match(punctuationRegex) || [textResponse.content];
+  
+          // Process each sentence for audio conversion
+          for (let i = 0; i < sentences.length; i++) {
+            await queue.add(async () => {
+              let sentence = sentences[i];
+              // Split the sentence into words, treating acronyms or punctuated words as single words
+              let words = sentence.split(' ').filter(w => w);
+  
+              while (words.length > 0) {
+                // Initialize chunk
+                let chunk = '';
+                let wordCount = 0;
+  
+                // Loop to ensure at least 20 words in the chunk if available
+                while (words.length > 0 && (wordCount < 20 || chunk.match(/[.!?]$/))) {
+                  let currentWord = words.shift();
+                  chunk += (chunk ? ' ' : '') + currentWord;
+                  // Increment word count, treating acronyms as single words
+                  wordCount += currentWord.includes('.') && !currentWord.match(/\b\w+\.\b/) ? 0 : 1;
+                }
+  
+                // Ensure the chunk ends with punctuation if it's not the last chunk
+                if (words.length > 0 && !chunk.match(/[.!?]$/)) {
+                  chunk += '.';
+                }
+  
+                if (chunk.trim().length > 0) {
+                  const audioBase64 = await convertTextToAudio(chunk,chatBot.elevenlabs);
+                  // If audio conversion was successful, handle the audio chunk here
+                  if (audioBase64) {
+
+                    io.emit(`${req.user.name}`, { audio: audioBase64});
+                  }
+                }
+              }
+            });
+          }
+        } else {
+          console.error('Invalid textResponse format:', textResponse);
+        }
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json('Could not return that request');
+      }
+    });
+  });
+  
+
 
 router.get('/:id', async (req, res, next) => {
   let chat = null;
@@ -61,74 +146,6 @@ router.post('/', requireUser, async (req, res) => {
     error.errors = { message: "No chatbot found with that id" };
     return next(error);
   }
-});
-
-import('p-queue').then((PQueueModule) => {
-  const queue = new PQueueModule.default({ concurrency: 1 }); // You can adjust concurrency as needed
-
-  router.patch('/:id', requireUser, async (req, res) => {
-    try {
-      const chat = await Chat.findOne({ _id: req.params.id, author: { _id: req.user._id } })
-        .populate('chatBot', '_id name');
-      const chatBot = await ChatBot.findOne({ _id: chat.chatBot._id });
-      const io = socket.getIO();
-      // Get AI response
-      const textResponse = await getAiResponse(chatBot, chat, req.body.chatRequest, req.user);
-      chat.messages = [...chat.messages, req.body.chatRequest, textResponse];
-      const updatedChat = await chat.save();
-      res.json(updatedChat);
-
-      // Process the text response
-      if (textResponse && typeof textResponse.content === 'string') {
-        // Split text into sentences
-        const punctuationRegex = /(?:[^.!?。]|\b\w+\.\b)+[.!?。]*/g;
-        const sentences = textResponse.content.match(punctuationRegex) || [textResponse.content];
-
-        // Process each sentence for audio conversion
-        for (let i = 0; i < sentences.length; i++) {
-          await queue.add(async () => {
-            let sentence = sentences[i];
-            // Split the sentence into words, treating acronyms or punctuated words as single words
-            let words = sentence.split(' ').filter(w => w);
-
-            while (words.length > 0) {
-              // Initialize chunk
-              let chunk = '';
-              let wordCount = 0;
-
-              // Loop to ensure at least 20 words in the chunk if available
-              while (words.length > 0 && (wordCount < 20 || chunk.match(/[.!?]$/))) {
-                let currentWord = words.shift();
-                chunk += (chunk ? ' ' : '') + currentWord;
-                // Increment word count, treating acronyms as single words
-                wordCount += currentWord.includes('.') && !currentWord.match(/\b\w+\.\b/) ? 0 : 1;
-              }
-
-              // Ensure the chunk ends with punctuation if it's not the last chunk
-              if (words.length > 0 && !chunk.match(/[.!?]$/)) {
-                chunk += '.';
-              }
-
-              if (chunk.trim().length > 0) {
-                const audioBase64 = await convertTextToAudio(chunk,chatBot.elevenlabs);
-                // If audio conversion was successful, handle the audio chunk here
-                if (audioBase64) {
-                  console.log(`Emitting audio to ${req.user.name}`);
-                  console.log(`Emitting audio to ${chatBot.elevenlabs}`);
-                  io.emit(`${req.user.name}`, { audio: audioBase64, text: chunk });
-                }
-              }
-            }
-          });
-        }
-      } else {
-        console.error('Invalid textResponse format:', textResponse);
-      }
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json('Could not return that request');
-    }
-  });
 });
 
 
