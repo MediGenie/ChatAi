@@ -1,3 +1,30 @@
+body {
+  font-size: 16px;
+}
+
+input[type=text], .popup-button, .prompt-suggestions-regen-button {
+  font-size: 16px;
+}
+
+@media screen and (max-width: 480px) {
+  .chatbot-show-box {
+    font-size: 14px;
+  }
+  .chatbot-show-message-form-container {
+    padding: 10px;
+  }
+
+  .image-preview-inside-input img {
+    height: auto; /* Reduced height for mobile */
+    width: 50px; /* Maintain aspect ratio */
+  }
+
+  .chat-message-image {
+    max-width: 100%; /* ensures image is not wider than the screen */
+    height: auto; /* maintains aspect ratio */
+  }
+}
+
 .chatbot-show-profile{
   display: flex;
   flex-direction: column;
@@ -38,33 +65,6 @@
 }
 
 
-.popup-button, .prompt-suggestions-regen-button{
-  background-color: var(--purple);
-  color: white;
-  font-family: Arial, Helvetica, sans-serif;
-  border: none;
-  width: 100%;
-  align-self: center;
-  padding: 8px;
-  cursor: pointer;
-  margin-bottom: 15px;
-  border-radius: 5px;
-  font-size: 1rem;
-}
-
-.prompt-suggestions-regen-button{
-  width: 75%;
-  align-items: center;
-}
-
-.popup-button:hover{
-  box-shadow: 0px 0px 2px rgba(12,1,1,0.6);
-}
-
-.popup-button:active{
-  box-shadow: inset 0px 0px 8px rgba(12,1,1,0.5);
-}
-
 .typing{
   // width: 125px;
   // height: 75px;
@@ -81,10 +81,9 @@ margin-bottom: 50px;
   // margin-left: 10px;
   margin-right: 5px;
   input[type=text]{
-    width: 60vw;
+    width: 30px;
     height: 70px;
     margin-right: 5px;
-    max-width: 600px;
   }
   // input[type=text]{
   //   width: 60vw;
@@ -139,9 +138,6 @@ margin-bottom: 50px;
   border-radius: 1%;
 }
 
-.prompt-menu-wrapper{
-  margin-top: 25px;
-}
 
 .back-button{
   position: absolute;
@@ -158,46 +154,6 @@ margin-bottom: 50px;
   transform: translateY(-2px);
 }
 
-.prompt-suggestions-container{
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  // min-height: 500px;
-  
-}
-
-.prompt-suggestions{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.prompt-entry{
-  margin: 5px;
-  width: 75%;
-  // margin-left: 10px;
-  // text-indent: 10px;
-  strong{
-    position: relative;
-    top: 2px;
-  }
-}
-.prompt-entry:hover{
-  cursor: pointer;
-  color: var(--purple)
-      // margin-right: 10px;
-}
-
-.prompt-loading-img{
-  width: 200px;
-  position: relative;
-  top: -20px;
-  margin-bottom: 25px;
-}
 
 
 .show-chat-popup-navigation{
@@ -275,21 +231,86 @@ margin-bottom: 50px;
 
 }
 
-.chatbot-show-message-form-container{
+.image-preview-container {
+  position: relative;
+  display: inline-block;
+}
+
+.image-preview {
+  width: 100px; /* Adjust as needed */
+  height: auto;
+}
+.input-with-image-preview {
   display: flex;
-  // justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%; /* Adjust width as needed */
+  padding: 5px;
+  position: relative;
+}
+
+.image-preview-inside-input {
+  margin-right: 10px; /* Space between image and input */
+}
+
+.image-preview-inside-input {
+  position: absolute;
+  left: 70%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 30px; /* Adjust as needed */
+  display: flex;
+  align-items: center;
+}
+
+
+.image-preview-inside-input img {
+  height: 60px; /* Increase the height of the image */
+  width: auto; /* Maintain aspect ratio */
+}
+
+.cancel-image-preview-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgb(63, 121, 155);
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.show-chat-form-input {
+  border: none;
+  flex-grow: 1;
+  padding-left: 10px; /* Space inside the input */
+}
+
+.cancel-image-preview-button {
+  width: 20px;
+  height: 20px;
+}
+.chatbot-show-message-form-container {
+  display: flex;
   justify-content: center;
   align-items: center;
   position: fixed;
-  // height: 10vh;
-  // height: 100px;
-  z-index: 9;
-  bottom: -5px;
+  bottom: 20px; /* Adjust this value as needed to increase the buffer */
   width: 100%;
   background-color: white;
-  // height: 10vh;
   height: 50px;
+  padding: 5px;
+  z-index: 1000; /* Ensure this is higher than the z-index of other elements like footer */
 }
+
+
 
 // @media screen and (max-width: 480px) {
 //   .navbar{
@@ -364,11 +385,10 @@ margin-bottom: 50px;
 }
 
 
-.show-chat-form-input{
-  width: 100%;
-  max-width: 1300px;
-  font-size: 1.1rem;
-  font-family: Arial, Helvetica, sans-serif;
+.show-chat-form-input {
+  border: none;
+  flex-grow: 1;
+  padding: 5px 10px;
 }
 
 .show-chat-form-input:focus{
@@ -381,6 +401,59 @@ margin-bottom: 50px;
 }
 
 .chat-form-button{
+  background-color: transparent;
+  color: var(--purple);
+  font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+  top: 4px;
+  border: none;
+  // width: 50px;
+  // align-self: center;
+  // vertical-align: middle;
+  // display: table-cell;
+  padding: 5px;
+  cursor: pointer;
+  // margin-top: 5px;
+  border-radius: 10px;
+  font-size: 1.75rem;
+  transition: all 750ms;
+  transition-timing-function: ease-out;
+}
+:root {
+  --blue: #007bff; /* Example blue color, replace with your desired shade */
+  --red: #00ffb3; /* Define other variables as needed */
+}
+
+.chat-form-button-audio-toggled {
+  color: var(--blue); /* change the color */
+  /* other styles if needed */
+}
+
+.chat-form-button-audio:disabled {
+  color: var(--red); /* change the color */
+  /* other styles if needed */
+}
+
+.chat-form-button-audio{
+  background-color: transparent;
+  font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+  top: 4px;
+  border: none;
+  // width: 50px;
+  // align-self: center;
+  // vertical-align: middle;
+  // display: table-cell;
+  padding: 5px;
+  cursor: pointer;
+  // margin-top: 5px;
+  border-radius: 10px;
+  font-size: 1.75rem;
+  transition: all 750ms;
+  transition-timing-function: ease-out;
+}
+
+.chat-form-button-image{
   background-color: transparent;
   color: var(--purple);
   font-family: Arial, Helvetica, sans-serif;

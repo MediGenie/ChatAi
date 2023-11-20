@@ -46,9 +46,9 @@ function LoginForm () {
   return (
     <div className='session-form-container'>
       <form className="session-form login" onSubmit={handleSubmit}>
-        <h2>Log In</h2>
+        <h2>로그인</h2>
         <label>
-          <span>Email</span>
+          <span>이메일</span>
           <input type="text"
             value={email}
             onChange={update('email')}
@@ -57,7 +57,7 @@ function LoginForm () {
         </label>
         <div className="errors">{errors?.email}</div>
         <label>
-          <span>Password</span>
+          <span>비밀번호</span>
           <input type="password"
             value={password}
             onChange={update('password')}
@@ -65,9 +65,9 @@ function LoginForm () {
           />
         </label>
         <div className="errors">{errors?.password}</div>
-        <input type="submit" value="Log In" disabled={!email || !password} />
+        <input type="submit" value="로그인" disabled={!email || !password} />
         <Link to={redirectPath ? `/signup?redirect=${redirectPath}` : '/signup'}>
-          Don't have an account? Sign up
+          가입 안하셨으면 가입하세요!
         </Link>
       </form>
     </div>

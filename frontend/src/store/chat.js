@@ -92,23 +92,36 @@ export const deleteChatByBotId = (chatbotId) => async dispatch =>{
 
 
 //ask new question to chatBot in an existing chat
-export const fetchChatResponse = (chatId, chatRequest)=> async dispatch=> {
-  
+export const fetchChatResponse = (chatId, chatRequest) => async dispatch => {
   try {
-    const res = await jwtFetch (`/api/chats/${chatId}`, {
+    // Check if chatRequest is an instance of FormData
+    const isFormData = chatRequest instanceof FormData;
+    console.log('Is chatRequest FormData:', isFormData);
+
+    const requestOptions = {
       method: 'PATCH',
-      body: JSON.stringify({chatRequest})
-    });
+      body: chatRequest
+    };
+
+    console.log('Request options:', requestOptions);
+
+    const res = await jwtFetch(`/api/chats/${chatId}`, requestOptions);
+    console.log('Chat response received:', res);
     const chatResponse = await res.json();
+
+    console.log('Chat response received:', chatResponse);
     dispatch(receiveChatResponse(chatResponse));
   } catch (err) {
+    console.error('Error in fetchChatResponse:', err);
+
     const resBody = await err.json();
+    console.log('Error response body:', resBody);
+
     if (resBody.statusCode === 400) {
       dispatch(receiveErrors(resBody.errors));
     }
   }
 };
-
 
 const nullErrors = null;
 
@@ -145,7 +158,7 @@ const chatsReducer = (state = { all: {}, current: {}, new:undefined}, action) =>
       return {...state, current: newCurrent, new: undefined }
     case RECEIVE_CHAT_RESPONSE:
       // debugger
-      const newRes = action.chat.messages.pop();
+      const newRes = action.chat.messages_images.pop();
       // newCurrent.messages.push({role:'assistant', content: action.chatResponse})
       return {...state, current: action.chat, new: newRes }
     case CLEAR_CHAT_RESPONSE:
@@ -157,4 +170,4 @@ const chatsReducer = (state = { all: {}, current: {}, new:undefined}, action) =>
   }
 };
 
-export default chatsReducer;
+export default chatsReducer; 

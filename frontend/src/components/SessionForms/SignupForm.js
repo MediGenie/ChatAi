@@ -98,7 +98,7 @@ useEffect(() => {
         <h2>Sign Up</h2>
         <div className="errors">{errors?.email}</div>
         <label>
-          <span>Email</span>
+          <span>이메일</span>
           <input type="text"
             value={email}
             onChange={update('email')}
@@ -107,7 +107,7 @@ useEffect(() => {
         </label>
         <div className="errors">{errors?.age}</div>
         <label>
-          <span>Age</span>
+          <span>나이 (18세 이상)</span>
           <input type="text"
             value={age}
             onChange={update('age')}
@@ -116,7 +116,7 @@ useEffect(() => {
         </label>
         <div className="errors">{errors?.location}</div>
         <label>
-          <span>Location</span>
+          <span>위치 (서울)</span>
           <input type="text"
             value={location}
             onChange={update('location')}
@@ -125,7 +125,7 @@ useEffect(() => {
         </label>
         <div className="errors">{errors?.name}</div>
         <label>
-          <span>name</span>
+          <span>이름 (홍길동)</span>
           <input type="text"
             value={name}
             onChange={update('name')}
@@ -134,7 +134,7 @@ useEffect(() => {
         </label>
         <div className="errors">{errors?.password}</div>
         <label>
-          <span>Password</span>
+          <span>비밀번호</span>
           <input type="password"
             value={password}
             onChange={update('password')}
@@ -145,7 +145,7 @@ useEffect(() => {
           {password !== password2 && 'Confirm Password field must match'}
         </div>
         <label>
-          <span>Confirm Password</span>
+          <span>비밀번호 확인</span>
           <input type="password"
             value={password2}
             onChange={update('password2')}
@@ -153,17 +153,17 @@ useEffect(() => {
           />
         </label>
         <label>
-          <span>Profile Image</span>
+          <span>프로필 이미지</span>
           <input type="file" accept=".jpg, .jpeg, .png" onChange={handleFile} />
         </label>
         {photoUrl? <img className='preview' src={photoUrl} alt='preview' /> : null}
         <input
           type="submit"
-          value="Sign Up"
+          value="가입하기"
           disabled={!email || !name || !password || password !== password2}
         />
           <div className="form-footer">
-        Already have an account? <Link to={loginUrlWithRedirect}>Log in</Link>
+        혹시 계정있으세요? <Link to={loginUrlWithRedirect}>로그인</Link>
       </div>
       </form>
 
