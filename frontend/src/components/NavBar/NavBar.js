@@ -23,11 +23,6 @@ function NavBar () {
       return (
         <div className="links-nav">
           <button onClick={logoutUser} id="logout-button" title='Logout'><RiLogoutBoxRLine /></button>
-          <Link id="profile-button" to='/profile' title='Profile'>
-            {user.profileImageUrl ? 
-              <img className='profile-pic' src={user.profileImageUrl} alt='profile-img' /> : 
-              null}
-          </Link>  
           {/* Check if the username is "admin" */}
           {user.name === 'admin' && (
             <div id="create-button" className='nav-create-button' title='Create a Chatbot!' onClick={()=>dispatch(openModal({name:'new'}))}>

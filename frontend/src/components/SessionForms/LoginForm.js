@@ -66,7 +66,7 @@ function LoginForm () {
         </label>
         <div className="errors">{errors?.password}</div>
         <input type="submit" value="로그인" disabled={!email || !password} />
-        <Link to={redirectPath ? `/signup?redirect=${redirectPath}` : '/signup'}>
+        <Link to={redirectPath ? `/signup?redirect=${redirectPath}` : '/signup'} className="login-link">
           가입 안하셨으면 가입하세요!
         </Link>
       </form>

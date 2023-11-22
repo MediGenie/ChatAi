@@ -49,9 +49,6 @@ useEffect(() => {
       case 'password':
         setState = setPassword;
         break;
-      case 'password2':
-        setState = setPassword2;
-        break;
       case 'age':
         setState = setage;
         break;
@@ -76,8 +73,6 @@ useEffect(() => {
       setPhotoUrl(null);
     }
   }
-
-
   const nameSubmit = e => {
     e.preventDefault();
     const user = {
@@ -94,42 +89,42 @@ useEffect(() => {
 
   return (
     <div className="session-form-container">
-      <form className="session-form" onSubmit={nameSubmit}>
-        <h2>Sign Up</h2>
+      <form className="session-form signup" onSubmit={nameSubmit}>
+        <h2>가입하기</h2>
         <div className="errors">{errors?.email}</div>
         <label>
           <span>이메일</span>
           <input type="text"
             value={email}
             onChange={update('email')}
-            placeholder="Email"
+            placeholder="이메일"
           />
         </label>
         <div className="errors">{errors?.age}</div>
         <label>
-          <span>나이 (18세 이상)</span>
+          <span>나이</span>
           <input type="text"
             value={age}
             onChange={update('age')}
-            placeholder="Age"
+            placeholder="18"
           />
         </label>
         <div className="errors">{errors?.location}</div>
         <label>
-          <span>위치 (서울)</span>
+          <span>위치</span>
           <input type="text"
             value={location}
             onChange={update('location')}
-            placeholder="Location"
+            placeholder="서울"
           />  
         </label>
         <div className="errors">{errors?.name}</div>
         <label>
-          <span>이름 (홍길동)</span>
+          <span>이름</span>
           <input type="text"
             value={name}
             onChange={update('name')}
-            placeholder="name"
+            placeholder="홍길동"
           />
         </label>
         <div className="errors">{errors?.password}</div>
@@ -138,33 +133,35 @@ useEffect(() => {
           <input type="password"
             value={password}
             onChange={update('password')}
-            placeholder="Password"
+            placeholder="비밀번호"
           />
         </label>
-        <div className="errors">
+        {/* <div className="errors">
           {password !== password2 && 'Confirm Password field must match'}
-        </div>
-        <label>
+        </div> */}
+        {/* <label>
           <span>비밀번호 확인</span>
           <input type="password"
             value={password2}
             onChange={update('password2')}
             placeholder="Confirm Password"
           />
-        </label>
-        <label>
+        </label> */}
+        {/* <label>
           <span>프로필 이미지</span>
           <input type="file" accept=".jpg, .jpeg, .png" onChange={handleFile} />
         </label>
-        {photoUrl? <img className='preview' src={photoUrl} alt='preview' /> : null}
+        {photoUrl? <img className='preview' src={photoUrl} alt='preview' /> : null} */}
         <input
           type="submit"
           value="가입하기"
-          disabled={!email || !name || !password || password !== password2}
+          disabled={!email || !name || !password}
         />
-          <div className="form-footer">
-        혹시 계정있으세요? <Link to={loginUrlWithRedirect}>로그인</Link>
-      </div>
+        
+        <Link to={loginUrlWithRedirect} className="login-link">혹시 계정있으세요? 로그인</Link>
+
+    
+
       </form>
 
     </div>

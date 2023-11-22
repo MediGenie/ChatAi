@@ -8,7 +8,7 @@ import { delay } from "../Util";
 import {BiSolidSend} from 'react-icons/bi';
 import { BsCloudUpload } from "react-icons/bs";
 import {SlOptions} from 'react-icons/sl';
-import { BsSoundwave } from "react-icons/bs";
+import { BsToggleOn, BsToggleOff } from "react-icons/bs";
 import {TbError404} from 'react-icons/tb';
 import io from 'socket.io-client';
 
@@ -363,9 +363,9 @@ function ChatBotShow(){
   type="button"
   onClick={toggleAudioProcessing}
   disabled={loadingChat}
-  className={`chat-form-button-audio ${isToggled ? 'chat-form-button-audio-toggled' : ''}`} 
+  className="chat-form-button-audio"
 >
-  <BsSoundwave />
+  {isToggled ? <BsToggleOn /> : <BsToggleOff />}
 </button>
         <button 
           type="button"
