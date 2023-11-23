@@ -41,7 +41,6 @@ const upload = multer();
         chat.messages = [...chat.messages,formattedMessage, textResponse.aiResponse]
         formattedMessageImage.imageDescription = textResponse.imageDescription; 
         chat.messages_images = [...chat.messages_images,formattedMessageImage, textResponse.aiResponse]
-        console.log('Chat response:', chat.messages);
         //const updatedChat = await chat.save();
         const updatedChat = await chat.save();
 

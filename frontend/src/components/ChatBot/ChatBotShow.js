@@ -220,7 +220,9 @@ function ChatBotShow(){
   }, [loadingChat])
   
   const handleChange = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !request.trim()) {
+      e.preventDefault(); // Prevent form submission if input is empty
+    } else if (e.key === 'Enter') {
       e.preventDefault(); // Prevent the default action to stop from submitting the form
       handleSubmit(e); // Call the submit function
     } else {
@@ -357,7 +359,7 @@ function ChatBotShow(){
   onChange={handleChange} 
   onKeyDown={handleChange} // Add this line
   value={request} 
-  placeholder={`Send a message to ${bot?.name}`}
+  placeholder={`To send you need to enter a message`}
 />
         </div><button 
   type="button"

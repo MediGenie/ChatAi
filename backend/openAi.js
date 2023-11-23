@@ -13,14 +13,14 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
 
     // System prompt build-up
     const systemPromptParts = [
-        userInfo.name ? `This person you are talking to is ${userInfo.name}.` : '',
-        userInfo.location ? `They are from ${userInfo.location}.` : '',
-        userInfo.age ? `They are ${userInfo.age} years old.` : '',
+        userInfo.name ? `This person you are talking to is ${userInfo.name}. the person is called and named ${userInfo.name}` : '',
+        userInfo.location ? `${userInfo.name} is from ${userInfo.location}.` : '',
+        userInfo.age ? `${userInfo.name} is ${userInfo.age} years old.` : '',
         chatBot.systemprompt ? `from ${chatBot.systemprompt}` : '',
         ...rules
     ];
     const systemPrompt = systemPromptParts.filter(part => part.length > 0).join(' ');
-
+    console.log('systemPrompt', systemPrompt);
     let userText = chatRequest.text || ""; // Ensure user text is a string
     let transformedRequest;
     let imageDescription;
@@ -48,7 +48,7 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
 
         // Extracting the image description
         imageDescription = imageResponse.data.choices[0].message.content;
-        userText = `Briefly explain about ${imageDescription} and then answer in this language ${userText} and the context about the explanation is this ${userText}. Dont mention anything about image description.`;
+        userText = `Consider the context of ${imageDescription}. ${userInfo.name}'s PROMPT: ${userText}.`;
 
         transformedRequest = {
             "role": "user",
@@ -62,6 +62,8 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
         };
     }
 
+
+
     // Constructing the messages array
     let messages = [{ role: 'system', content: systemPrompt }, ...chat.messages, transformedRequest];
     // Request chat completion from OpenAI
@@ -71,6 +73,7 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
             messages: messages,
             temperature:0.4,
         });
+
         return {
             aiResponse: response.data.choices[0].message,
             imageDescription: imageDescription // Return the image description as well
