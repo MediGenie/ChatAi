@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../../store/session';
 import { openModal } from "../../store/modal";
@@ -7,16 +8,29 @@ import {FiSearch} from 'react-icons/fi';
 import {RiLogoutBoxRLine} from 'react-icons/ri';
 import {BsChatRightDots} from 'react-icons/bs';
 import {FaHandFist} from 'react-icons/fa6';
+import { fetchChatBot } from "../../store/chatbots";
+import { useParams } from "react-router-dom/cjs/react-router-dom.min";
+
+
 
 function NavBar () {
   const loggedIn = useSelector(state => !!state.session.user);
   const user = useSelector(state => state.session.user)
   const dispatch = useDispatch();
-  
+  const bot = useSelector(state => state.entities.chatBots?.new ? state.entities.chatBots.new: null  );
+  const {chatBotId} = useParams();
+  const [botLoaded, setBotLoaded] = useState(false);
+
+
   const logoutUser = e => {
       e.preventDefault();
       dispatch(logout());
   }
+
+  useEffect(()=>{
+
+    dispatch(fetchChatBot(chatBotId)).then(()=> setBotLoaded(true));
+  }, [dispatch, chatBotId])
 
   const getLinks = () => {
     if (loggedIn) {
@@ -41,7 +55,7 @@ function NavBar () {
       <div className="nav-left">
         {/* <Link to='/'><img className='logo' src={gpt} alt='logo' /></Link> */}
         <div id='chat-logo-title'>
-          <Link to='/' ><h1 id='chat-title'>MeVerse</h1></Link>
+          <Link to='/' ><h1 id='chat-title'>{bot?.name} </h1></Link>
         </div>
         
       </div>
