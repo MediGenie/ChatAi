@@ -289,9 +289,24 @@ margin-bottom: 50px;
 
 .show-chat-form-input {
   border: none;
+  font-family: "Pretendard-Regular";
   flex-grow: 1;
-  padding-left: 10px; /* Space inside the input */
+  padding: 5px 10px;
+  font-size: 16px; /* Set minimum font size */
+  height: 70px; /* Fixed height */
+  overflow: auto; /* Add scrollbar if content exceeds height */
+  resize: none; /* Prevent textarea resizing */
 }
+
+
+.show-chat-form-input:focus {
+  outline: 1px solid var(--purple);
+}
+
+.show-chat-form-input:hover {
+  border: 2px solid var(--purple);
+}
+
 
 .cancel-image-preview-button {
   width: 20px;
@@ -346,6 +361,7 @@ margin-bottom: 50px;
   width: 90vw;
   max-width: 700px;
   h1{
+    font-family: Arial, Helvetica, sans-serif;
     text-align: center;
     strong{
       font-weight: 700;
@@ -384,11 +400,7 @@ margin-bottom: 50px;
 }
 
 
-.show-chat-form-input {
-  border: none;
-  flex-grow: 1;
-  padding: 5px 10px;
-}
+
 
 .show-chat-form-input:focus{
   outline: 1px solid var(--purple);
@@ -419,7 +431,7 @@ margin-bottom: 50px;
 }
 :root {
   --blue: #007bff; /* Example blue color, replace with your desired shade */
-  --red: #007bff; /* Define other variables as needed */
+  --red: #00ffb3; /* Define other variables as needed */
 }
 
 .chat-form-button-audio-toggled {
@@ -449,6 +461,21 @@ margin-bottom: 50px;
   transition: all 750ms;
   transition-timing-function: ease-out;
 }
+
+.chat-form-button-mic{
+  background-color: transparent;
+  position: relative;
+  top: 4px;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  border-radius: 15px;
+  font-size: 2.5rem;
+  transition: all 750ms;
+  transition-timing-function: ease-out;
+}
+
+
 
 .chat-form-button-image{
   background-color: transparent;
@@ -482,5 +509,5 @@ margin-bottom: 50px;
   // box-shadow: inset 0px 0px 8px rgba(12,1,1,0.5);
 }
 .chat-form-button:disabled{
-  color: #017BFF;
+  color: #b9a5fc;
 }

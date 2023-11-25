@@ -4,12 +4,14 @@ import session from './session';
 import errors from './errors';
 import entities from './entities';
 import ui from './ui';
+import transcriptionReducer from './transcriptionReducer';
 
 const rootReducer = combineReducers({
   session,
   errors,
   entities,
-  ui
+  ui,
+  transcription: transcriptionReducer,
 });
 
 

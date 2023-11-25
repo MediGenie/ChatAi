@@ -8,12 +8,19 @@ import { delay } from "../Util";
 import {BiSolidSend} from 'react-icons/bi';
 import { BsCloudUpload } from "react-icons/bs";
 import {SlOptions} from 'react-icons/sl';
-import { BsToggleOn, BsToggleOff } from "react-icons/bs";
+import { BsSoundwave } from "react-icons/bs";
 import {TbError404} from 'react-icons/tb';
 import io from 'socket.io-client';
+import { MdMic, MdMicOff } from 'react-icons/md';
+import axios from 'axios';
+import jwtFetch from '../../store/jwt';
+import { fetchTranscription } from '../../store/transcription';
+import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
+import { IoMicCircle, IoMicCircleOutline } from "react-icons/io5";
+import { BsToggleOn, BsToggleOff } from "react-icons/bs";
 
 function ChatBotShow(){
-  
+
   const dispatch = useDispatch();
   const {chatBotId} = useParams();
   const bot = useSelector(state => state.entities.chatBots?.new ? state.entities.chatBots.new: null  )
@@ -29,6 +36,11 @@ function ChatBotShow(){
   const [showMenu, setShowMenu] = useState(false);
   const [messages, setMessages] = useState([]);
   const [isToggled, setIsToggled] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcription, setTranscription] = useState('');
+  const [audioUrl, setAudioUrl] = useState(null);
+  const transcriptionData = useSelector((state) => state.transcription.data);
+  
 
   
   const [audioQueue, setAudioQueue] = useState([]);
@@ -39,11 +51,105 @@ function ChatBotShow(){
   const newResponse = useSelector(state => state.entities.chats?.new);
 
   const chatEndRef = useRef(null);
-  const socket = io('http://meverse.kr:5001');
+  const socket = io('https://meverse.kr');
     
   const scrollToBottomChat = ()=>{
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
+
+
+  const handleTranscription = async () => {
+    try {
+        if (!recordedBlob) {
+            console.error('No recorded audio to send.');
+            return;
+        }
+
+        // Create an audio blob with the appropriate MIME type
+        const audioBlob = new Blob([recordedBlob], { type: 'audio/webm' }); // Assuming the blob is in webm format
+        const audioFile = new File([audioBlob], 'recording.webm', { type: 'audio/webm' });
+
+        // Dispatch the Redux action to fetch the transcription data
+        // Replace 'fetchTranscription' with your actual action
+        await dispatch(fetchTranscription(audioFile));
+    } catch (error) {
+        console.error('Error creating audio blob:', error);
+    }
+};
+
+  useEffect(() => {
+    // You can now access transcriptionData here and use it as needed
+    if (transcriptionData) {
+      console.log('Transcription:', transcriptionData);
+      setTranscription(transcriptionData);
+      setRequest(transcriptionData);
+    }
+  }, [transcriptionData]);
+
+
+  const {
+    startRecording,
+    stopRecording,
+    recordedBlob,
+    error,
+    // ... other states and controls you might need
+} = useVoiceVisualizer();
+
+useEffect(() => {
+    if (recordedBlob) {
+        console.log("Recorded Blob:", recordedBlob);
+        // Process the recorded blob as needed
+    }
+}, [recordedBlob]);
+
+useEffect(() => {
+    if (error) {
+        console.error("Recording Error:", error);
+    }
+}, [error]);
+
+  // Get the recorded audio blob
+  useEffect(() => {
+      if (!recordedBlob) return;
+
+      console.log(recordedBlob);
+  }, [recordedBlob, error]);
+
+  // Get the error when it occurs
+  useEffect(() => {
+      if (!error) return;
+
+      console.error(error);
+  }, [error]);
+
+  useEffect(() => {
+    if (!isRecording && recordedBlob) {
+      // If recording has just stopped and recordedBlob is available
+      handleSendRecordedAudio();
+    }
+  }, [isRecording, recordedBlob]); // Add isRecording and recordedBlob as dependencies
+
+  const handleSendRecordedAudio = async () => {
+    if (recordedBlob) {
+      // Call handleTranscription with the recordedBlob
+      handleTranscription(recordedBlob);
+    } else {
+      console.error('No recorded audio to send.');
+    }
+  };
+  const handleRecordClick = () => {
+    if (isRecording) {
+      stopRecording();
+      setIsRecording(false);
+    } else {
+      startRecording();
+      setIsRecording(true);
+    }
+  };
+
+
+
+
 
   const toggleAudioProcessing = () => {
     setIsToggled(!isToggled);
@@ -214,15 +320,17 @@ function ChatBotShow(){
     scrollToBottomChat();
   }, [chat?.messages]); // Assuming 'chat?.messages' holds the array of messages
 
+  function playSound(audioUrl) {
+    const audioElement = new Audio(audioUrl);
+    audioElement.play();
+}
   
   useEffect(()=>{
     setTimeout(scrollToBottomChat, 500) //had to add a delay so typing gif has time to load before the scroll occurs
   }, [loadingChat])
   
   const handleChange = (e) => {
-    if (e.key === 'Enter' && !request.trim()) {
-      e.preventDefault(); // Prevent form submission if input is empty
-    } else if (e.key === 'Enter') {
+    if (e.key === 'Enter') {
       e.preventDefault(); // Prevent the default action to stop from submitting the form
       handleSubmit(e); // Call the submit function
     } else {
@@ -230,6 +338,7 @@ function ChatBotShow(){
       setRequest(e.target.value);
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setRequest(""); // Clear the input field immediately
@@ -259,16 +368,6 @@ function ChatBotShow(){
     }
   };
 
-
-  const popup = ()=>{
-    return (
-    <div className="show-chat-popup-container">
-      <div className="show-chat-popup">
-       
-          </div>
-      </div>
-      )
-  }
 
   if(botLoaded && !bot){
     return(
@@ -341,8 +440,7 @@ function ChatBotShow(){
               </div>
             </ul>
       </div>
-      {bot?.name &&<div className='chatbot-show-message-form-container'>
-
+  
 
         <form className="show-chat-form" onSubmit={handleSubmit}>
         <div className="chatbot-show-message-form-container">
@@ -353,6 +451,9 @@ function ChatBotShow(){
               <button onClick={clearImagePreview} className="cancel-image-preview-button">×</button>
             </div>
           )}
+                            <button type="button" onClick={handleRecordClick} className={`chat-form-button-mic ${isRecording ? 'recording' : ''}`}>
+        {isRecording ? <IoMicCircle />: <IoMicCircleOutline />}
+      </button>
          <input 
   type='text' 
   className="show-chat-form-input" 
@@ -361,7 +462,8 @@ function ChatBotShow(){
   value={request} 
   placeholder={`To send you need to enter a message`}
 />
-        </div><button 
+        </div>
+        <button 
   type="button"
   onClick={toggleAudioProcessing}
   disabled={loadingChat}
@@ -393,9 +495,7 @@ function ChatBotShow(){
         />
       </div>
         </form>
-        
-      </div>}
-      {showMenu && popup()}
+      
     </>
   )
 

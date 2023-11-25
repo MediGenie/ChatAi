@@ -14,11 +14,13 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^5.3.4",
     "react-scripts": "5.0.1",
+    "react-voice-visualizer": "^1.8.1",
     "redux": "^4.2.0",
     "redux-thunk": "^2.4.2",
     "sass": "^1.62.1",
     "socket.io-client": "^4.7.2",
-    "socketio": "^1.0.0"
+    "socketio": "^1.0.0",
+    "swiper": "^11.0.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -43,6 +45,5 @@
   },
   "devDependencies": {
     "redux-logger": "^3.0.6"
-  },
-  "proxy": "http://localhost:5001"
+  }
 }

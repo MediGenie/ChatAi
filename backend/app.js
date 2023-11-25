@@ -19,9 +19,10 @@ const usersRouter = require('./routes/api/users');
 const csrfRouter = require('./routes/api/csrf');
 const chatbotsRouter = require('./routes/api/chatbots');
 const chatsRouter = require('./routes/api/chats');
+const transcriptionRouter = require('./routes/api/transcription');
 
 const corsOptions = {
-  origin: 'http://meverse.kr', // Replace with the exact URL of your React app
+  origin: 'https://meverse.kr', // Replace with the exact URL of your React app
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204
@@ -63,7 +64,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/csrf', csrfRouter);
 app.use('/api/chatbots', chatbotsRouter);
 app.use('/api/chats', chatsRouter);
-
+app.use('/api/transcription', transcriptionRouter);
 
 
 

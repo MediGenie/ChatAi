@@ -18,7 +18,7 @@ const upload = multer();
   import('p-queue').then((PQueueModule) => {
     const queue = new PQueueModule.default({ concurrency: 1 });
   
-    router.patch('/:id', requireUser, upload.single('imageBase64'), async (req, res) => {
+    router.patch('/:id', requireUser, upload.fields([{ name: 'imageBase64' }, { name: 'audio' }]), async (req, res) => {
       try {
         const isToggled = req.body.isToggled === 'true';
         const chat = await Chat.findOne({ _id: req.params.id, author: { _id: req.user._id } })
@@ -28,10 +28,12 @@ const upload = multer();
         // Extract text and base64 image from the request body
         const text = req.body.text;
         const base64Image = req.body.image;
+        const audioFile = req.files.audio ? req.files.audio[0] : null;
         // Construct chat request object
         const chatRequest = {
-          text: text,
-          image: base64Image
+          text: text || '',
+          image: base64Image,
+          audio: audioFile
         };
 
         const formattedMessage = { role: 'user', content: chatRequest.text };
@@ -41,17 +43,17 @@ const upload = multer();
         chat.messages = [...chat.messages,formattedMessage, textResponse.aiResponse]
         formattedMessageImage.imageDescription = textResponse.imageDescription; 
         chat.messages_images = [...chat.messages_images,formattedMessageImage, textResponse.aiResponse]
-        //const updatedChat = await chat.save();
+        console.log('Chat response:', chat.messages);
         const updatedChat = await chat.save();
+
 
         res.json(updatedChat);
         console.log('Json');
         // Process the text response
-        if (isToggled && textResponse && typeof textResponse.aiResponse.content === 'string') {
+        if (textResponse && typeof textResponse.aiResponse.content === 'string') {
           // Split text into sentences
           const punctuationRegex = /(?:[^.!?。]|\b\w+\.\b)+[.!?。]*/g;
           const sentences = textResponse.aiResponse.content.match(punctuationRegex) || [textResponse.aiResponse.content];
-  
   
           // Process each sentence for audio conversion
           for (let i = 0; i < sentences.length; i++) {
@@ -82,7 +84,7 @@ const upload = multer();
                   const audioBase64 = await convertTextToAudio(chunk,chatBot.elevenlabs);
                   // If audio conversion was successful, handle the audio chunk here
                   if (audioBase64) {
-
+                    console.log('audioBase64', req.user.name);
                     io.emit(`${req.user.name}`, { audio: audioBase64});
                   }
                 }
