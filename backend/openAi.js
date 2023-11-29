@@ -33,7 +33,7 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
                 {
                     role: "user",
                     content: [
-                        { type: "text", text: "describe in detail" },
+                        { type: "text", text: "describe what is going on in the picture and extract any text and numbers in the image. " },
                         {
                             type: "image_url",
                             image_url: {
@@ -43,7 +43,7 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
                     ],
                 },
             ],
-            max_tokens: 150
+            max_tokens: 250
         });
 
         // Extracting the image description

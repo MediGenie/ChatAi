@@ -18,6 +18,9 @@ import { fetchTranscription } from '../../store/transcription';
 import { useVoiceVisualizer, VoiceVisualizer } from "react-voice-visualizer";
 import { IoMicCircle, IoMicCircleOutline } from "react-icons/io5";
 import { BsToggleOn, BsToggleOff } from "react-icons/bs";
+import ReactMarkdown from 'react-markdown';
+
+const socket = io('wss://meverse.kr');
 
 function ChatBotShow(){
 
@@ -51,8 +54,7 @@ function ChatBotShow(){
   const newResponse = useSelector(state => state.entities.chats?.new);
 
   const chatEndRef = useRef(null);
-  const socket = io('https://meverse.kr');
-    
+
   const scrollToBottomChat = ()=>{
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
@@ -451,9 +453,9 @@ useEffect(() => {
               <button onClick={clearImagePreview} className="cancel-image-preview-button">×</button>
             </div>
           )}
-                            <button type="button" onClick={handleRecordClick} className={`chat-form-button-mic ${isRecording ? 'recording' : ''}`}>
-        {isRecording ? <IoMicCircle />: <IoMicCircleOutline />}
-      </button>
+                        <button type="button" onClick={handleRecordClick} className={`chat-form-button-mic hide-on-mobile ${isRecording ? 'recording' : ''}`}>
+    {isRecording ? <IoMicCircle /> : <IoMicCircleOutline />}
+</button>
          <input 
   type='text' 
   className="show-chat-form-input" 

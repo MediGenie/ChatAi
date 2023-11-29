@@ -6,6 +6,11 @@ input[type=text], .popup-button, .prompt-suggestions-regen-button {
   font-size: 16px;
 }
 
+.chat-message-image {
+  max-width: 80%; /* ensures image is not wider than the screen */
+  height: auto; /* maintains aspect ratio */
+}
+
 @media screen and (max-width: 480px) {
   .chatbot-show-box {
     font-size: 14px;
@@ -40,6 +45,21 @@ input[type=text], .popup-button, .prompt-suggestions-regen-button {
   width: 200px;
 
 }
+
+.chat-message-image-container {
+  width: 100%; /* Full width of the container */
+  padding: 10px; /* Spacing around the image */
+  box-sizing: border-box; /* Include padding in the width calculation */
+}
+
+/* Styling for the image within the container */
+.chat-message-image-container img {
+  max-width: 100%; /* Maximum width of the image is 100% of its container */
+  height: auto; /* Height is set to auto to maintain aspect ratio */
+  display: block; /* Display block to remove any extra space below the image */
+}
+
+
 .chatbot-show-box{
   // width: 400px;
   width: 95vw;
@@ -289,7 +309,7 @@ margin-bottom: 50px;
 
 .show-chat-form-input {
   border: none;
-  font-family: "Pretendard-Regular";
+  font-family: "Pretendard Regular";
   flex-grow: 1;
   padding: 5px 10px;
   font-size: 16px; /* Set minimum font size */
@@ -297,8 +317,6 @@ margin-bottom: 50px;
   overflow: auto; /* Add scrollbar if content exceeds height */
   resize: none; /* Prevent textarea resizing */
 }
-
-
 .show-chat-form-input:focus {
   outline: 1px solid var(--purple);
 }
@@ -431,7 +449,7 @@ margin-bottom: 50px;
 }
 :root {
   --blue: #007bff; /* Example blue color, replace with your desired shade */
-  --red: #00ffb3; /* Define other variables as needed */
+  --red: #000000; /* Define other variables as needed */
 }
 
 .chat-form-button-audio-toggled {
@@ -494,6 +512,16 @@ margin-bottom: 50px;
   font-size: 1.75rem;
   transition: all 750ms;
   transition-timing-function: ease-out;
+}
+
+@media screen and (max-width: 600px) {
+  .hide-on-mobile {
+      display: none;
+  }
+}
+
+.chat-message-image-container {
+  padding: 5px; /* Smaller padding on smaller screens */
 }
 
 .chat-form-button:hover{

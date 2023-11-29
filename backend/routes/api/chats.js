@@ -50,7 +50,7 @@ const upload = multer();
         res.json(updatedChat);
         console.log('Json');
         // Process the text response
-        if (textResponse && typeof textResponse.aiResponse.content === 'string') {
+        if (isToggled && textResponse && typeof textResponse.aiResponse.content === 'string') {
           // Split text into sentences
           const punctuationRegex = /(?:[^.!?。]|\b\w+\.\b)+[.!?。]*/g;
           const sentences = textResponse.aiResponse.content.match(punctuationRegex) || [textResponse.aiResponse.content];
