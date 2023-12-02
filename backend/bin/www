@@ -1,6 +1,4 @@
 const http = require('http'); // Use the http module for HTTP server
-const https = require('https'); // Use the https module for HTTPS server
-const fs = require('fs'); // Require the 'fs' module for reading SSL certificate files
 const app = require('../app');
 const debug = require('debug')('backend:server');
 const socket = require('../config/socket.js');
@@ -11,10 +9,8 @@ const { mongoURI: db } = require('../config/keys.js');
 /**
  * Get ports from environment and store in Express.
  */
-const httpPort = normalizePort(process.env.HTTP_PORT || '8080');
-const httpsPort = normalizePort(process.env.HTTPS_PORT || '8443');
+const httpPort = normalizePort(process.env.HTTP_PORT || '5001');
 app.set('httpPort', httpPort);
-app.set('httpsPort', httpsPort);
 
 /**
  * Create HTTP server.
@@ -22,25 +18,8 @@ app.set('httpsPort', httpsPort);
 const httpServer = http.createServer(app);
 
 /**
- * Read SSL certificate and private key files
- */
-const privateKey = fs.readFileSync('/etc/nginx/sites-available/private.key', 'utf8'); // Replace with the path to your private key file
-const certificate = fs.readFileSync('/etc/nginx/sites-available/certificate.pem', 'utf8'); // Replace with the path to your certificate file
-
-const credentials = {
-  key: privateKey,
-  cert: certificate,
-};
-
-/**
- * Create HTTPS server.
- */
-const httpsServer = https.createServer(credentials, app);
-
-/**
  * Initialize Socket.io
  */
-socket.init(httpsServer); // Initialize Socket.io on the HTTPS server
 
 /**
  * Connect to Mongo database, then allow the servers to listen for requests
@@ -48,21 +27,21 @@ socket.init(httpsServer); // Initialize Socket.io on the HTTPS server
 mongoose
   .connect(db, { useNewUrlParser: true })
   .then(() => {
+    console.log("Connected to MongoDB successfully"); // Log successful connection
     debug("Connected to MongoDB successfully");
     httpServer.listen(httpPort);
-    httpsServer.listen(httpsPort);
+
   })
-  .catch(err => debug(err));
+  .catch(err => {
+    console.log("MongoDB connection error:", err); // Log connection error
+    debug(err);
+  });
 
 /**
  * Event listener for HTTP server "listening" event.
  */
 httpServer.on('listening', onListening);
 
-/**
- * Event listener for HTTPS server "listening" event.
- */
-httpsServer.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -92,14 +71,10 @@ function normalizePort(val) {
  */
 function onListening() {
   var addrHttp = httpServer.address();
-  var addrHttps = httpsServer.address();
   var bindHttp = typeof addrHttp === 'string'
     ? 'pipe ' + addrHttp
     : 'port ' + addrHttp.port;
-  var bindHttps = typeof addrHttps === 'string'
-    ? 'pipe ' + addrHttps
-    : 'port ' + addrHttps.port;
 
+  console.log('HTTP Listening on ' + bindHttp); // Log server listening status
   debug('HTTP Listening on ' + bindHttp);
-  debug('HTTPS Listening on ' + bindHttps);
 }

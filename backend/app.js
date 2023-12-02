@@ -22,7 +22,7 @@ const chatsRouter = require('./routes/api/chats');
 const transcriptionRouter = require('./routes/api/transcription');
 
 const corsOptions = {
-  origin: 'https://meverse.kr', // Replace with the exact URL of your React app
+  origin: 'http://localhost:3000', // Replace with the exact URL of your React app
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204

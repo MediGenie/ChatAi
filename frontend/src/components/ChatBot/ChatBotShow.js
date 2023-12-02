@@ -10,7 +10,6 @@ import { BsCloudUpload } from "react-icons/bs";
 import {SlOptions} from 'react-icons/sl';
 import { BsSoundwave } from "react-icons/bs";
 import {TbError404} from 'react-icons/tb';
-import io from 'socket.io-client';
 import { MdMic, MdMicOff } from 'react-icons/md';
 import axios from 'axios';
 import jwtFetch from '../../store/jwt';
@@ -51,7 +50,6 @@ function ChatBotShow(){
   const newResponse = useSelector(state => state.entities.chats?.new);
 
   const chatEndRef = useRef(null);
-  const socket = io('https://meverse.kr');
     
   const scrollToBottomChat = ()=>{
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -237,35 +235,6 @@ useEffect(() => {
     setResponse('');
     // dispatch(clearChatResponse())
   }, [bot])
-
-  
-  useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to WebSocket server');
-    });
-
-    socket.on('error', (error) => {
-      console.error('WebSocket connection error:', error);
-    });
-    
-    // Listen for audio messages
-    socket.on(`${sessionUser?.name}`, (message) => {
-      console.log('Received message:', message);
-      if (message.audio) {
-        console.log('Received audio message:', message.audio);
-        handleIncomingAudio(message);
-      }
-      // Optionally handle text messages if needed
-    });
-  
-    return () => {
-      socket.off('connect');
-      socket.off('error');
-      socket.off(`${sessionUser?.name}`);
-      socket.disconnect();
-    };
-  }, [sessionUser?.name]);
-
 
   const handleIncomingAudio = async (data) => {
     if (data) {
