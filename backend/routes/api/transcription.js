@@ -3,10 +3,12 @@ const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path'); // Import the 'path' module to handle file paths
-const { OpenAIApi, Configuration } = require("openai");
-const openai = new OpenAIApi(new Configuration({
+const { OpenAI } = require("openai");
+
+const openai = new OpenAI({
     apiKey: process.env.CHAT_API_KEY
-}));
+});
+
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/', upload.single('audio'), async (req, res) => {
@@ -35,7 +37,7 @@ router.post('/', upload.single('audio'), async (req, res) => {
         // Create a readable stream from the temporary file path
         const audioStream = fs.createReadStream(tempFilePath);
 
-        const transcription = await openai.createTranscription(audioStream, "whisper-1");
+        const transcription = await openai.audio.transcriptions.create(audioStream, "whisper-1");
 
         console.log("Received response from OpenAI API");
         const transcriptionText = transcription.data.text;

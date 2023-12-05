@@ -25,7 +25,7 @@ export const receiveChatRequest = (chatRequest) => ({
   type: RECEIVE_CHAT_REQUEST,
   chatRequest
 });
-const receiveChatResponse = (chat) => ({
+export const receiveChatResponse = (chat) => ({
   type: RECEIVE_CHAT_RESPONSE,
   chat
 });
@@ -109,7 +109,7 @@ export const fetchChatResponse = (chatId, chatRequest) => async dispatch => {
     console.log('Chat response received:', res);
     const chatResponse = await res.json();
 
-    console.log('Chat response received:', chatResponse);
+    console.log('###Chat response received:', chatResponse);
     dispatch(receiveChatResponse(chatResponse));
   } catch (err) {
     console.error('Error in fetchChatResponse:', err);
@@ -155,12 +155,16 @@ const chatsReducer = (state = { all: {}, current: {}, new:undefined}, action) =>
       if(state.new) newCurrent.messages.push(state.new);
       // return [...state, {role: 'user', content: action.chatRequest}]
       newCurrent.messages.push({role: 'user', content: action.chatRequest})
+      newCurrent.messages_images.push({role: 'user', content: action.chatRequest})
       return {...state, current: newCurrent, new: undefined }
     case RECEIVE_CHAT_RESPONSE:
       // debugger
-      const newRes = action.chat.messages_images.pop();
       // newCurrent.messages.push({role:'assistant', content: action.chatResponse})
-      return {...state, current: action.chat, new: newRes }
+      return {...state, current: action.chat, new: "" }
+      // const newRes = action.chat.messages_images.pop();
+      // console.log("###newRes",newRes)
+      // // newCurrent.messages.push({role:'assistant', content: action.chatResponse})
+      // return {...state, current: action.chat, new: newRes }
     case CLEAR_CHAT_RESPONSE:
       return {...state, new: undefined}
     case RECEIVE_CHAT:
