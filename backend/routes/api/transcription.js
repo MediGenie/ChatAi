@@ -37,11 +37,13 @@ router.post('/', upload.single('audio'), async (req, res) => {
         // Create a readable stream from the temporary file path
         const audioStream = fs.createReadStream(tempFilePath);
 
-        const transcription = await openai.audio.transcriptions.create(audioStream, "whisper-1");
+        const transcription = await openai.audio.transcriptions.create({
+            model : 'whisper-1',
+            file : audioStream
+        });
 
         console.log("Received response from OpenAI API");
-        const transcriptionText = transcription.data.text;
-        console.log("Transcription text:", transcriptionText);
+        const transcriptionText = transcription.text;
 
         // Remove the temporary file
         fs.unlinkSync(tempFilePath);

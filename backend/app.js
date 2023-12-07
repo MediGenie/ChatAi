@@ -20,6 +20,7 @@ const csrfRouter = require('./routes/api/csrf');
 const chatbotsRouter = require('./routes/api/chatbots');
 const chatsRouter = require('./routes/api/chats');
 const transcriptionRouter = require('./routes/api/transcription');
+const { createPineconeIndex } = require('./pinecode');
 
 const corsOptions = {
   origin: 'https://meverse.kr', // Replace with the exact URL of your React app
@@ -38,13 +39,13 @@ app.use(cookieParser()); // parse cookies as an object on req.cookies
 app.use(passport.initialize());
 
 // Security Middleware
-  // Enable CORS only in development because React will be on the React
-  // development server (http://localhost:3000). (In production, the Express 
-  // server will serve the React files statically.)
-  app.use((req, res, next) => {
-    res.setHeader('Referrer-Policy', 'no-referrer'); // Sets a more restrictive policy
-    next();
-  });
+// Enable CORS only in development because React will be on the React
+// development server (http://localhost:3000). (In production, the Express 
+// server will serve the React files statically.)
+app.use((req, res, next) => {
+  res.setHeader('Referrer-Policy', 'no-referrer'); // Sets a more restrictive policy
+  next();
+});
 
 
 // Set the _csrf token and create req.csrfToken method to generate a hashed
@@ -108,5 +109,14 @@ app.use((err, req, res, next) => {
     errors: err.errors
   })
 });
+
+(async () => {
+
+  const indexName = "chatai";
+  const vectorDimension = 1536;
+
+  await createPineconeIndex(indexName, vectorDimension);
+
+})();
 
 module.exports = app;

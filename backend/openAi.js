@@ -1,11 +1,21 @@
 const { json } = require("express");
-const {OpenAI} = require("openai");
+const { OpenAI } = require("openai");
 const socket = require('./config/socket');
+const { updatePinecone, queryPineconeVectorStoreAndQueryLLM } = require("./pinecode");
+const { DirectoryLoader } = require('langchain/document_loaders/fs/directory')
+const { TextLoader } = require('langchain/document_loaders/fs/text')
+const { PDFLoader } = require('langchain/document_loaders/fs/pdf')
+const { BufferLoader } = require("langchain/document_loaders/fs/buffer");
 
+const loader = new DirectoryLoader("./documents", {
+    ".txt": (path) => new TextLoader(path),
+    ".pdf": (path) => new PDFLoader(path),
+    ".png": (path) => new BufferLoader(path),
+});
 
 const rules = [
-  'You should respond as realistically as you can in the format of a casual text message conversation.', 
-  'Never ever mention that you are an AI language model.'
+    'You should respond as realistically as you can in the format of a casual text message conversation.',
+    'Never ever mention that you are an AI language model.'
 ]
 async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
 
@@ -13,9 +23,9 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
         const io = socket.getIO();
 
         const openai = new OpenAI({
-            apiKey:  process.env.CHAT_API_KEY,
-          });
-    
+            apiKey: process.env.CHAT_API_KEY,
+        });
+
         // System prompt build-up
         const systemPromptParts = [
             userInfo.name ? `This person you are talking to is ${userInfo.name}. the person is called and named ${userInfo.name}` : '',
@@ -28,36 +38,44 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
         let userText = chatRequest.text || ""; // Ensure user text is a string
         let transformedRequest;
         let imageDescription;
-    
+        let imageResponse;
+
         if (chatRequest.image) {
-            // Process the image using GPT-4 Vision
-            const imageResponse = await openai.chat.completions.create({
-                model: "gpt-4-vision-preview",
-                messages: [
-                    {
-                        role: "user",
-                        content: [
-                            { type: "text", text: "describe what is going on in the picture and extract any text and numbers in the image. " },
-                            {
-                                type: "image_url",
-                                image_url: {
-                                    "url": `data:image/jpeg;base64,${chatRequest.image}`
+            const docs = await loader.load();
+
+            if (chatRequest.type == "text/plain") {
+                await updatePinecone("chatai", docs);
+                imageResponse = await queryPineconeVectorStoreAndQueryLLM("chatai", userText);
+                imageDescription = imageResponse;
+            } else {
+                // Process the image using GPT-4 Vision
+                imageResponse = await openai.chat.completions.create({
+                    model: "gpt-4-vision-preview",
+                    messages: [
+                        {
+                            role: "user",
+                            content: [
+                                { type: "text", text: "describe what is going on in the picture and extract any text and numbers in the image. " },
+                                {
+                                    type: "image_url",
+                                    image_url: {
+                                        "url": `data:image/jpeg;base64,${chatRequest.image}`
+                                    },
                                 },
-                            },
-                        ],
-                    },
-                ],
-                max_tokens: 250
-            });
-    
+                            ],
+                        },
+                    ],
+                    max_tokens: 250
+                });
+                imageDescription = imageResponse.choices[0].message.content;
+            }
+
             // Extracting the image description
-            imageDescription = imageResponse.choices[0]?.message?.content;
-                if (!imageDescription) {
+            if (!imageDescription) {
                 throw new Error('Image description not found in response');
-                console.log('Image Response:', imageResponse);
-}
+            }
             userText = `Consider the context of ${imageDescription}. ${userInfo.name}'s PROMPT: ${userText}.`;
-    
+
             transformedRequest = {
                 "role": "user",
                 "content": userText // Directly assign the string here
@@ -69,9 +87,7 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
                 "content": userText // Directly assign the string here
             };
         }
-    
-    
-    
+
         // Constructing the messages array
         let messages = [{ role: 'system', content: systemPrompt }, ...chat.messages, transformedRequest];
 
@@ -83,38 +99,37 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
         // }
         // messages.push(transformedRequest); // Always keep the transformedRequest as the last element
         // Request chat completion from OpenAI
-    
-            const stream = await openai.chat.completions.create({
-                model: "gpt-4-1106-preview",
-                messages: messages,
-                stream: true,
-            });
-    
-            let content = "";
-            let role = ""
-            for await (const chunk of stream) {
-                let chunkContent = chunk.choices[0]?.delta?.content || ""
-                io.emit(`stream chunk`, { chunk: chunkContent});
-                role += chunk.choices[0]?.delta?.role || ""
-                content += chunkContent;
-            }
-    
-            let aiResponse = {
-                role,
-                content
-            }
-    
-            return {
-                aiResponse,
-                imageDescription, // Return the image description as well
-            };
+
+        const stream = await openai.chat.completions.create({
+            model: "gpt-4-1106-preview",
+            messages: messages,
+            stream: true,
+        });
+
+        let content = "";
+        let role = ""
+        for await (const chunk of stream) {
+            let chunkContent = chunk.choices[0]?.delta?.content || ""
+            io.emit(`stream chunk`, { chunk: chunkContent });
+            role += chunk.choices[0]?.delta?.role || ""
+            content += chunkContent;
+        }
+
+        let aiResponse = {
+            role,
+            content
+        }
+
+        return {
+            aiResponse,
+            imageDescription, // Return the image description as well
+        };
     } catch (error) {
         console.log('=====>error in catch', error);
     }
 
-   
 }
 
 module.exports = {
-  getAiResponse,
+    getAiResponse,
 }

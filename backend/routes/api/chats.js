@@ -9,8 +9,18 @@ const { convertTextToAudio } = require("./fetchAPI.js");
 const socket = require("../../config/socket");
 const multer = require("multer");
 const fs = require("fs");
+const path = require("path");
 const upload = multer();
- 
+
+function base64ToFile(base64String) {
+  const base64Data = base64String.replace(/^data:[^;]+;base64,/, '');
+  const timestamp = new Date().getTime();
+  const tempFilePath = path.join(__dirname, '../../documents', `${timestamp}.txt`)
+  const buffer = Buffer.from(base64Data, 'base64');
+
+  fs.writeFileSync(tempFilePath, buffer);
+}
+
 import("p-queue").then((PQueueModule) => {
   const io = socket.getIO();
 
@@ -36,12 +46,17 @@ import("p-queue").then((PQueueModule) => {
         const text = bodyData.text;
         const base64Image = bodyData.image;
         const audioFile = bodyData.audio ? bodyData.audio[0] : null;
-        
+
+        if (bodyData.fileType == "text/plain") {
+          base64ToFile(base64Image);
+        }
+
         // Construct chat request object
         const chatRequest = {
           text: text || "",
           image: base64Image,
           audio: audioFile,
+          type: bodyData.fileType
         };
 
         const formattedMessage = { role: "user", content: chatRequest.text };
@@ -73,7 +88,7 @@ import("p-queue").then((PQueueModule) => {
         ];
 
         const updatedChat = await chat.save();
-        
+
         // Emit the updated chat data to the user's socket
         socket.emit("chat-updated", updatedChat);
 
@@ -138,8 +153,12 @@ import("p-queue").then((PQueueModule) => {
           console.error("Invalid textResponse format:", textResponse);
         }
       } catch (error) {
-        console.error(error , "errrrrrrrror");
+        console.error(error, "errrrrrrrror");
       }
+
+      socket.on("disconnect", () => {
+        console.log("User disconnected");
+      });
     });
   });
 

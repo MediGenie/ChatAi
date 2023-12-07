@@ -36,6 +36,7 @@ function ChatBotShow() {
   );
   const sessionUser = useSelector((state) => state.session?.user);
   const [imageFile, setImageFile] = useState(null);
+  const [imageFileType, setImageFileType] = useState(null);
   const [request, setRequest] = useState("");
   const [response, setResponse] = useState("");
   const fileInputRef = useRef(null);
@@ -202,7 +203,7 @@ function ChatBotShow() {
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, width, height);
             const resizedDataUrl = canvas.toDataURL(file.type);
-            callback(resizedDataUrl);
+            callback(resizedDataUrl, file.type);
           };
           img.src = e.target.result;
         };
@@ -211,8 +212,9 @@ function ChatBotShow() {
 
       if (file.size > 548576) {
         // if image is larger than 1MB
-        resizeImage(file, 512, 512, (resizedBase64) => {
+        resizeImage(file, 512, 512, (resizedBase64, fileType) => {
           setImageFile(resizedBase64.replace("data:", "").replace(/^.+,/, ""));
+          setImageFileType(fileType)
           setImagePreviewUrl(resizedBase64); // Set resized image for preview
           console.log("Resized image:", resizedBase64); // Log resized image data
         });
@@ -223,6 +225,7 @@ function ChatBotShow() {
             .replace("data:", "")
             .replace(/^.+,/, "");
           setImageFile(base64String);
+          setImageFileType(file.type)
           setImagePreviewUrl(reader.result); // Set image preview URL
           console.log("Image file base64:", base64String); // Log base64 image data
         };
@@ -235,6 +238,7 @@ function ChatBotShow() {
   const clearImagePreview = () => {
     setImagePreviewUrl(null);
     setImageFile(null);
+    setImageFileType(null);
   };
 
   useEffect(() => {
@@ -261,6 +265,7 @@ function ChatBotShow() {
     socket.on("chat-updated", (data) => {
       setLoadingResponse(false);
       setImageFile(null);
+      setImageFileType(null);
       setResponse("");
       dispatch(receiveChatResponse(data));
     });
@@ -330,7 +335,7 @@ function ChatBotShow() {
   }, []);
 
   useEffect(() => {
-        scrollToBottomChat();
+    scrollToBottomChat();
   }, [chat?.messages, loadingResponse, response]); // Assuming 'chat?.messages' holds the array of messages
 
   function playSound(audioUrl) {
@@ -362,8 +367,9 @@ function ChatBotShow() {
     if (request.trim()) {
       formData.append("text", request.trim());
     }
-    if (imageFile) {
+    if (imageFile && imageFileType) {
       formData.append("image", imageFile);
+      formData.append("fileType", imageFileType);
     }
 
     formData.append("isToggled", isToggled);
@@ -476,7 +482,7 @@ function ChatBotShow() {
                     <h1>{bot?.name} </h1>
                   </div>
                   {response &&
-                    response.split("\n").map((message,index) => {
+                    response.split("\n").map((message, index) => {
                       return <h2 key={index}>{message}</h2>;
                     })}
                 </div>
@@ -484,7 +490,7 @@ function ChatBotShow() {
               {loadingResponse ? (
                 <img className="typing" src={typingGif} alt="gif" />
               ) : null}
-              <div className="ref-div"ref={chatEndRef} />
+              <div className="ref-div" ref={chatEndRef} />
             </ul>
           </div>
         </ul>
@@ -507,9 +513,8 @@ function ChatBotShow() {
             <button
               type="button"
               onClick={handleRecordClick}
-              className={`chat-form-button-mic ${
-                isRecording ? "recording" : ""
-              }`}
+              className={`chat-form-button-mic ${isRecording ? "recording" : ""
+                }`}
             >
               {isRecording ? <IoMicCircle /> : <IoMicCircleOutline />}
             </button>
@@ -548,7 +553,6 @@ function ChatBotShow() {
           <input
             type="file"
             onChange={handleImageChange}
-            accept="image/*"
             style={{ display: "none" }}
             ref={fileInputRef}
           />
