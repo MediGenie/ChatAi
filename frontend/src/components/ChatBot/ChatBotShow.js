@@ -522,14 +522,14 @@ function ChatBotShow() {
               placeholder={`To send you need to enter a message`}
             />
           </div>
-          <button
+          {/* <button
             type="button"
             onClick={toggleAudioProcessing}
             disabled={loadingChat}
             className="chat-form-button-audio"
           >
             {isToggled ? <BsToggleOn /> : <BsToggleOff />}
-          </button>
+          </button> */}
           <button
             type="button"
             className="chat-form-button-image"

@@ -31,7 +31,7 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
     
         if (chatRequest.image) {
             // Process the image using GPT-4 Vision
-            const imageResponse = await openai.createChatCompletion({
+            const imageResponse = await openai.chat.completions.create({
                 model: "gpt-4-vision-preview",
                 messages: [
                     {
@@ -51,7 +51,11 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
             });
     
             // Extracting the image description
-            imageDescription = imageResponse.data.choices[0].message.content;
+            imageDescription = imageResponse.choices[0]?.message?.content;
+                if (!imageDescription) {
+                throw new Error('Image description not found in response');
+                console.log('Image Response:', imageResponse);
+}
             userText = `Consider the context of ${imageDescription}. ${userInfo.name}'s PROMPT: ${userText}.`;
     
             transformedRequest = {
@@ -70,6 +74,14 @@ async function getAiResponse(chatBot, chat, chatRequest, userInfo) {
     
         // Constructing the messages array
         let messages = [{ role: 'system', content: systemPrompt }, ...chat.messages, transformedRequest];
+
+        // let messages = [{ role: 'system', content: systemPrompt }];
+        // if (chat.messages.length > 1) {
+        //     messages.push(...chat.messages.slice(-2)); // Add the last two chat messages
+        // } else {
+        //     messages.push(...chat.messages); // If there are fewer than two, add all available
+        // }
+        // messages.push(transformedRequest); // Always keep the transformedRequest as the last element
         // Request chat completion from OpenAI
     
             const stream = await openai.chat.completions.create({
